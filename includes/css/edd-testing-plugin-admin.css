@@ -111,7 +111,30 @@ edd-testing-plugin-admin/* Fix bad css in WP core */
 	margin:5px;
 }
 .edd-testing-plugin-generate-testing-json-area{
-	margin-top:10px;
+	margin-top:25px;
+}
+
+/* Define Tests View */
+.edd-testing-plugin-helper-json-paste-area textarea{
+	width:100%;
+	height:1000px;
+}
+.edd-testing-plugin-json-helper-valid{
+	border: 2px solid #4BB543;
+}
+.edd-testing-plugin-json-helper-invalid{
+	border: 2px solid #cc0000;
+}
+
+/* Run Tests View */
+.edd-testing-plugin-admin-settings .edd-testing-plugin-scenario-link{
+	margin:5px;
+}
+.edd-testing-plugin-admin-settings .edd-testing-plugin-scenario-link:first-child{
+	margin-left:0px;
+}
+.edd-testing-plugin-scenario-setting{
+	margin: 5px 0px;
 }
 
 /* Admin Lightbox */

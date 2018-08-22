@@ -61,6 +61,12 @@ function edd_testing_plugin_get_views_and_settings(){
 		'define_scenarios' => array(
 			'visual_name' => '2. Define scenarios',
 			'react_component' => 'define_tests_view',
+			'description' => __( 'Paste helper JSON into the box below to define the testing scenarios', 'edd-testing-plugin' ),
+		),
+		'run_scenarios' => array(
+			'visual_name' => '3. Run scenarios',
+			'react_component' => 'run_scenarios',
+			'description' => __( 'Based on the Helper JSON, here are the scenarios that need to be tested.', 'edd-testing-plugin' ),
 		),
 	);
 

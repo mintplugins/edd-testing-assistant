@@ -24,10 +24,31 @@ window.EDD_Testing_Plugin_Admin = class EDD_Testing_Plugin_Admin extends React.C
 
         this.state = {
             current_view: 'get_started', //get_started, define_scenarios
+            options_to_test: {},
+            total_scenarios: 1,
+            all_scenarios: {}
         };
 
         this.get_current_view_class = this.get_current_view_class.bind( this );
         this.set_current_view = this.set_current_view.bind( this );
+    }
+
+    update_state( state_key, state_value ){
+
+        this.setState( {
+            [state_key]: state_value
+        }, function() {
+
+            // Update the number of scenarios in json as well to match the new state
+            var data = update_total_scenarios( this.state.options_to_test );
+
+            this.setState( {
+                total_scenarios: data['scenario_counter'],
+                all_scenarios: data['all_scenarios'],
+            } );
+
+        } );
+
     }
 
     get_current_view_class( view_in_question ) {
@@ -103,7 +124,7 @@ window.EDD_Testing_Plugin_Admin = class EDD_Testing_Plugin_Admin extends React.C
 
             var DynamicReactComponent = edd_testing_plugin_string_to_component( views[key]['react_component'] );
 
-            mapper.push( <DynamicReactComponent key={ key } view_slug={ key } view_info={ views[key] } current_view={ this.state.current_view } current_view_class={ this.get_current_view_class( key ) } /> )
+            mapper.push( <DynamicReactComponent key={ key } view_slug={ key } view_info={ views[key] } current_view={ this.state.current_view } current_view_class={ this.get_current_view_class( key ) } update_parent_state={ this.update_state.bind( this ) } all_scenarios={ this.state.all_scenarios } /> )
         }
 
         // This lets us output the buttons one by one
@@ -185,29 +206,6 @@ window.EDD_Testing_Plugin_View_Button = class EDD_Testing_Plugin_View_Button ext
     }
 }
 
-// This component is the portion that accepts a JSON file, which defines the settings which will be combined to create scenarios.
-window.EDD_Testing_Plugin_Define_Test_View = class EDD_Testing_Plugin_Define_Test_View extends React.Component {
-
-    constructor( props ){
-        super(props);
-    }
-
-    render() {
-
-        return (
-            <div className={ 'edd-testing-plugin-admin-define-tests-view' + this.props.current_view_class }>
-                <div className="edd-testing-plugin-admin-view-title">
-                    <h2>{ this.props.view_info.visual_name }</h2>
-                </div>
-                <div className={ 'edd-testing-plugin-admin-view-description' }>
-                    Coming soon
-                </div>
-            </div>
-        )
-    }
-
-}
-
 // This component outputs the "Helper JSON" view, which gives you a starting point to define your tests.
 window.EDD_Testing_Plugin_Helper_JSON_View = class EDD_Testing_Plugin_Helper_JSON_View extends React.Component {
 
@@ -217,7 +215,7 @@ window.EDD_Testing_Plugin_Helper_JSON_View = class EDD_Testing_Plugin_Helper_JSO
         this.state = {
             component_has_mounted: false,
             options_to_test: {},
-            total_scenarios: 0,
+            total_scenarios: 1,
             all_scenarios: {}
         }
 
@@ -230,132 +228,15 @@ window.EDD_Testing_Plugin_Helper_JSON_View = class EDD_Testing_Plugin_Helper_JSO
         }, function() {
 
             // Update the number of scenarios in json as well to match the new state
-            this.update_total_scenarios( this.state.options_to_test );
+            var data = update_total_scenarios( this.state.options_to_test );
+
+            this.setState( {
+                total_scenarios: data['scenario_counter'],
+                all_scenarios: data['all_scenarios'],
+            } );
 
         } );
 
-    }
-
-    variation_drill_down( settings_and_variations, options_to_test, mode, parent_key = false ) {
-
-        // Loop through each setting variation and count it
-        for( var level_key in options_to_test ) {
-
-            if ( options_to_test['testing_values'] ) {
-
-                settings_and_variations[parent_key] = options_to_test['testing_values'];
-
-                // This is here because the variant holder has 2 levels,
-                break;
-
-            } else {
-
-                // If this is not an actual setting, but simply a container, like the top level tabs, drill down to the settings
-                settings_and_variations = this.variation_drill_down( settings_and_variations, options_to_test[level_key], mode, level_key );
-
-            }
-        }
-
-        return settings_and_variations;
-    }
-
-    scenario_looper( data, settings_and_variations, current_loop_depth_key, doing_sub = false, scenario_in_question = 11 ) {
-
-        var loop_depth_reached = false;
-
-        // Loop through each setting
-        for( var setting_key in settings_and_variations ) {
-
-            if ( ! current_loop_depth_key ) {
-                current_loop_depth_key = setting_key;
-                loop_depth_reached = true;
-            }
-
-            // Start looping from where we left off previously
-            if ( ! loop_depth_reached ) {
-                if ( setting_key == current_loop_depth_key ){
-                    loop_depth_reached = true;
-                    continue;
-                } else {
-                    continue;
-                }
-            }
-
-            // Loop through each variation of the setting
-            for ( var i = 0; i < settings_and_variations[setting_key].length; i++ ) {
-
-                // Add this variation to the current scenario array
-                data['current_scenario'][setting_key] = settings_and_variations[setting_key][i];
-
-                // Attempt to keep looping, if there are still other options
-                data = this.scenario_looper( data, settings_and_variations, setting_key, true );
-
-            }
-
-            // Loop through 1 setting, then done
-            //if ( ! doing_sub ) {
-                break;
-            //}
-        }
-
-        // If we are at the end of the deepest loop possible, we've looped through/included all options, and thus a scenario is born!
-
-        // If the setting key is the last one in the array, we've looped through/included all options, and thus a scenario is born!
-        if ( setting_key == data['last_setting_key'] ) {
-
-            //if ( scenario_in_question == data['scenario_counter'] ) {
-
-                // If the previous scenario is exactly the same as this one, don't add a new scenario
-                if ( JSON.stringify( data['all_scenarios'][data['scenario_counter']] ) === JSON.stringify( data['current_scenario'] ) ) {
-
-                    return data;
-
-                } else {
-
-                    // Increment the scenario counter, since we are adding a new scenario now
-                    data['scenario_counter'] = data['scenario_counter'] + 1;
-
-                    // Declare a new scenario within the array of all scenarios
-                    data['all_scenarios'][data['scenario_counter']] = {};
-
-                    // Fill that new scenario with all of the settings>values which are unique to this scenario, by pulling them from the current_scenario
-                    for( var the_setting_key in data['current_scenario'] ) {
-                        data['all_scenarios'][data['scenario_counter']][the_setting_key] = data['current_scenario'][the_setting_key];
-                    }
-                }
-            //}
-
-        }
-
-        // If the loop depth was never reached, we have reached the end of the array of settings and variations
-        return data;
-
-    }
-
-    update_total_scenarios( options_to_test ) {
-
-        var settings_and_variations = this.variation_drill_down( {}, options_to_test, 'count_all_variations' );
-
-        // Loop through all settings, so we can retrieve which one is the last one
-        for( var setting_key in settings_and_variations ) {
-            // Nothing needs to be done here, as we are simply getting the last setting_key
-        }
-
-        var data = {
-            all_scenarios: {},
-            current_scenario: {},
-            scenario_counter: 0,
-            last_setting_key: setting_key
-        };
-
-        data = this.scenario_looper( data, settings_and_variations, false, false );
-
-        this.setState( {
-            total_scenarios: data['scenario_counter'],
-            all_scenarios: data['all_scenarios'],
-        } );
-
-        console.log( data );
     }
 
     render_options( options ) {
@@ -392,7 +273,22 @@ window.EDD_Testing_Plugin_Helper_JSON_View = class EDD_Testing_Plugin_Helper_JSO
         }
     }
 
+    scenarios_to_test_text( total_scenarios ) {
+
+        var button_text;
+
+        if ( this.state.total_scenarios == 1 ) {
+            button_text = total_scenarios + ' scenario to test';
+        } else {
+            button_text = total_scenarios + ' scenarios to test';
+        }
+
+        return button_text;
+    }
+
     render() {
+
+        var json_stringified = JSON.stringify( this.state.options_to_test, null, 2 );
 
         return (
             <div className={ 'edd-testing-plugin-admin-helper-json-view' + this.props.current_view_class }>
@@ -413,9 +309,178 @@ window.EDD_Testing_Plugin_Helper_JSON_View = class EDD_Testing_Plugin_Helper_JSO
                     </div>
 
                     <div className="edd-testing-plugin-generate-testing-json-area">
-                        <a className="button" href={ 'data:text/json;charset=utf-8,' + encodeURIComponent( JSON.stringify( this.state.options_to_test, null, 2) ) } download={ 'test.json' }>{ 'Download helper JSON (' + this.state.total_scenarios + ' scenarios to test)' }</a>
+                        <h2>{ this.scenarios_to_test_text( this.state.total_scenarios ) } </h2>
+                        <p>{ 'Based on the above selection, ' + this.state.total_scenarios + ' scenario(s) need to be tested. Copy the helper JSON and move on to the next step called "Define Scenarios". It is recommended that the helper JSON been pasted into the relating GitHub issue so that others can easily run the same series of tests.' }</p>
+                        <a className="edd-testing-plugin-copy-json-button button" onClick={ edd_testing_plugin_copy_text_to_clipboard.bind( null, json_stringified ) }>{ 'Copy helper JSON' }</a> <a className="button" href={ 'data:text/json;charset=utf-8,' + encodeURIComponent( json_stringified ) } download={ 'test.json' }>{ 'Download helper JSON file' }</a>
                     </div>
 
+                </div>
+            </div>
+        )
+    }
+
+}
+
+// This component is the portion that accepts a JSON file, which defines the settings which will be combined to create scenarios.
+window.EDD_Testing_Plugin_Define_Test_View = class EDD_Testing_Plugin_Define_Test_View extends React.Component {
+
+    constructor( props ){
+        super(props);
+
+        this.state = {
+            helper_json: '',
+            helper_json_valid: 'unknown',
+        };
+
+        this.handle_helper_json_change = this.handle_helper_json_change.bind( this );
+    }
+
+    handle_helper_json_change( event ) {
+
+        this.setState( {
+            helper_json: event.target.value
+        } );
+
+        if ( ! event.target.value ) {
+            this.setState( {
+                helper_json_valid: 'unknown'
+            } );
+
+            return;
+        }
+
+        // Check if what was entered is valid JSON
+        var is_valid = true;
+
+        try {
+            var helper_object = JSON.parse( event.target.value );
+        } catch(e) {
+            // If the JSOn entered is not valid
+            is_valid = false;
+        }
+
+        this.setState( {
+            helper_json_valid: is_valid
+        } );
+
+        // If what was entered is valid json, pass it up to the parent so it can be broken-out into scenarios
+        if ( is_valid ) {
+
+            // Update the options to test in the parent, which will trigger a calculation of the scenarios
+            this.props.update_parent_state( 'options_to_test', helper_object );
+
+            // Set the view to be the "Run Scenarios" step
+            this.props.update_parent_state( 'current_view', 'run_scenarios' );
+
+        }
+
+
+    }
+
+    helper_json_valid_class_name( helper_json_valid ) {
+
+        if ( 'unknown' == helper_json_valid ) {
+            return '';
+        }
+
+        if ( helper_json_valid ) {
+            return ' ' + 'edd-testing-plugin-json-helper-valid';
+        } else {
+            return ' ' + 'edd-testing-plugin-json-helper-invalid';
+        }
+    }
+
+    render() {
+
+        return (
+            <div className={ 'edd-testing-plugin-admin-define-tests-view' + this.props.current_view_class }>
+                <div className="edd-testing-plugin-admin-view-title">
+                    <h2>{ this.props.view_info.visual_name }</h2>
+                </div>
+                <div className={ 'edd-testing-plugin-admin-view-description' }>
+                    { this.props.view_info.description }
+                </div>
+                <div className={ 'edd-testing-plugin-helper-json-paste-area' + this.helper_json_valid_class_name( this.state.helper_json_valid ) }>
+                    <textarea value={ this.state.helper_json } onChange={ this.handle_helper_json_change.bind( null ) }></textarea>
+                </div>
+            </div>
+        )
+    }
+
+}
+
+// This component is the one that displays, and assist with all scenarios that need to be tested
+window.EDD_Testing_Plugin_Run_Scenarios = class EDD_Testing_Plugin_Run_Scenarios extends React.Component {
+
+    constructor( props ){
+        super(props);
+
+        this.state = {
+            current_scenario: 1,
+        };
+
+        this.set_current_scenario = this.set_current_scenario.bind( this );
+
+    }
+
+    set_current_scenario( key ) {
+
+        this.setState( {
+            current_scenario: key
+        } );
+    }
+
+    render_scenario_links( all_scenarios ) {
+
+        var mapper = [];
+
+        // Loop through each scenario and output a link to it
+        for( var scenario in all_scenarios ) {
+
+            mapper.push( <button key={ scenario } className={ 'edd-testing-plugin-scenario-link button' } onClick={ this.set_current_scenario.bind( null, scenario ) }>
+                { scenario }
+            </button> );
+        }
+
+        // This lets us output the buttons one by one
+        return mapper.map((scenario_link, index) => {
+          return scenario_link;
+        })
+    }
+
+    render_current_scenario( current_scenario, all_scenarios ) {
+
+        var mapper = [];
+
+        // Loop through all of the settings in the current scenario
+        for( var setting in all_scenarios[current_scenario] ) {
+            mapper.push( <div key={ setting } className={ 'edd-testing-plugin-scenario-setting' }>
+                <span className={ 'edd-testing-plugin-scenario-setting-name' }><strong>{ setting }</strong>: </span>
+                <span className={ 'edd-testing-plugin-scenario-setting-value' }>{ all_scenarios[current_scenario][setting]['value'] }</span>
+            </div> );
+        }
+
+        // This lets us output the settings one by one
+        return mapper.map((setting, index) => {
+          return setting;
+        })
+    }
+
+    render() {
+
+        return (
+            <div className={ 'edd-testing-plugin-admin-run-scenarios-view' + this.props.current_view_class }>
+                <div className="edd-testing-plugin-admin-view-title">
+                    <h2>{ this.props.view_info.visual_name }</h2>
+                </div>
+                <div className={ 'edd-testing-plugin-admin-view-description' }>
+                    { this.props.view_info.description }
+                </div>
+                <div className={ 'edd-testing-plugin-scenario-chooser-area' }>
+                    { this.render_scenario_links( this.props.all_scenarios ) }
+                </div>
+                <div className={ 'edd-testing-plugin-current-scenario-area' }>
+                    { this.render_current_scenario( this.state.current_scenario, this.props.all_scenarios ) }
                 </div>
             </div>
         )
@@ -1027,27 +1092,139 @@ window.edd_testing_plugin_get_values_for_testing = function edd_testing_plugin_g
 	return values_for_testing;
 }
 
-window.edd_testing_plugin_get_next_key = function edd_testing_plugin_get_next_key( settings_and_variations, setting_key ) {
+window.variation_drill_down = function variation_drill_down( settings_and_variations, options_to_test, mode, parent_key = false ) {
 
-    var keys = Object.keys( settings_and_variations );
-    var should_break = false;
-    var next_key = '';
+    // Loop through each setting variation and count it
+    for( var level_key in options_to_test ) {
 
-    for ( var j = 0; j < keys.length; j++ ) {
+        if ( options_to_test['testing_values'] ) {
 
-        console.log( keys[j] );
+            settings_and_variations[parent_key] = {
+                context: options_to_test['info']['context'],
+                testing_values: options_to_test['testing_values']
+            };
 
-        if ( should_break ) {
-            next_key = keys[j];
+            // This is here because the variant holder has 2 levels,
             break;
-        }
 
-        if ( keys[j] == setting_key ) {
-            should_break = true;
+        } else {
+
+            // If this is not an actual setting, but simply a container, like the top level tabs, drill down to the settings
+            settings_and_variations = variation_drill_down( settings_and_variations, options_to_test[level_key], mode, level_key );
+
         }
     }
 
-    return next_key;
+    return settings_and_variations;
+}
+
+window.scenario_looper = function scenario_looper( data, settings_and_variations, current_loop_depth_key, doing_sub = false, scenario_in_question = 11 ) {
+
+    var loop_depth_reached = false;
+
+    // Loop through each setting
+    for( var setting_key in settings_and_variations ) {
+
+        if ( ! current_loop_depth_key ) {
+            current_loop_depth_key = setting_key;
+            loop_depth_reached = true;
+        }
+
+        // Start looping from where we left off previously
+        if ( ! loop_depth_reached ) {
+            if ( setting_key == current_loop_depth_key ){
+                loop_depth_reached = true;
+                continue;
+            } else {
+                continue;
+            }
+        }
+
+        // Loop through each variation of the setting
+        for ( var i = 0; i < settings_and_variations[setting_key]['testing_values'].length; i++ ) {
+
+            // Add this variation to the current scenario array
+            data['current_scenario'][setting_key] = {
+                context: 'edd_admin_setting',
+                value: settings_and_variations[setting_key]['testing_values'][i]
+            };
+
+            // Attempt to keep looping, if there are still other options
+            data = scenario_looper( data, settings_and_variations, setting_key, true );
+
+        }
+
+        // Loop through 1 setting, then done
+        //if ( ! doing_sub ) {
+            break;
+        //}
+    }
+
+    // If we are at the end of the deepest loop possible, we've looped through/included all options, and thus a scenario is born!
+
+    // If the setting key is the last one in the array, we've looped through/included all options, and thus a scenario is born!
+    if ( setting_key == data['last_setting_key'] ) {
+
+        //if ( scenario_in_question == data['scenario_counter'] ) {
+
+            // If the previous scenario is exactly the same as this one, don't add a new scenario
+            if ( JSON.stringify( data['all_scenarios'][data['scenario_counter']] ) === JSON.stringify( data['current_scenario'] ) ) {
+
+                return data;
+
+            } else {
+
+                // Increment the scenario counter, since we are adding a new scenario now
+                data['scenario_counter'] = data['scenario_counter'] + 1;
+
+                // Declare a new scenario within the array of all scenarios
+                data['all_scenarios'][data['scenario_counter']] = {};
+
+                // Fill that new scenario with all of the settings>values which are unique to this scenario, by pulling them from the current_scenario
+                for( var the_setting_key in data['current_scenario'] ) {
+                    data['all_scenarios'][data['scenario_counter']][the_setting_key] = data['current_scenario'][the_setting_key];
+                }
+            }
+        //}
+
+    }
+
+    // If the loop depth was never reached, we have reached the end of the array of settings and variations
+    return data;
+
+}
+
+window.update_total_scenarios = function update_total_scenarios( options_to_test ) {
+
+    var settings_and_variations = variation_drill_down( {}, options_to_test, 'count_all_variations' );
+
+    // Loop through all settings, so we can retrieve which one is the last one
+    for( var setting_key in settings_and_variations ) {
+        // Nothing needs to be done here, as we are simply getting the last setting_key
+    }
+
+    var data = {
+        all_scenarios: {},
+        current_scenario: {},
+        scenario_counter: 0,
+        last_setting_key: setting_key
+    };
+
+    data = scenario_looper( data, settings_and_variations, false, false );
+
+    return data;
+}
+
+window.edd_testing_plugin_copy_text_to_clipboard = function edd_testing_plugin_copy_text_to_clipboard( text, event ) {
+
+    event.preventDefault();
+
+    var dummy = document.createElement("textarea");
+    document.body.appendChild(dummy);
+    dummy.value = text;
+    dummy.select();
+    document.execCommand("copy");
+    document.body.removeChild(dummy);
 }
 
 // This function takes a string and turns it into the corresponding react object
@@ -1064,8 +1241,8 @@ window.edd_testing_plugin_string_to_component = function edd_testing_plugin_stri
             return EDD_Testing_Plugin_Radio_Boolean;
         case 'multiple_checkboxes':
             return EDD_Testing_Plugin_Multiple_Checkboxes;
-        case 'currency_field':
-            return EDD_Testing_Plugin_Admin_Currency_Field;
+        case 'run_scenarios':
+            return EDD_Testing_Plugin_Run_Scenarios;
             break;
         case 'tip_history_view':
             return EDD_Testing_Plugin_Tip_History_View;
