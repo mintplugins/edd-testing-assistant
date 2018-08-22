@@ -1,0 +1,166 @@
+edd-testing-plugin-admin/* Fix bad css in WP core */
+#wpbody {
+	position: initial;
+}
+.edd-testing-plugin-admin-container input[type=number]{
+	height:initial;
+}
+
+.edd-testing-plugin-admin-container{
+	width:100%;
+	max-width:830px;
+	background: #f5f5f5;
+    border: 1px solid #e5e5e5;
+    webkit-box-shadow: 0 1px 1px rgba(0,0,0,.04);
+    box-shadow: 0 1px 1px rgba(0,0,0,.04);
+	box-sizing: border-box;
+	display:table;
+}
+.edd-testing-plugin-admin-container *{
+	box-sizing: border-box;
+}
+.edd-testing-plugin-admin-container h2 {
+	margin-top:0px;
+}
+.edd-testing-plugin-current-view{
+	display:inline-block;
+}
+.edd-testing-plugin-hidden-view{
+	display:none;
+}
+.edd-testing-plugin-admin-settings-icon{
+	width: 40px;
+    display: inline-block;
+    vertical-align: middle;
+}
+.edd-testing-plugin-admin-settings-title{
+	display: inline-block;
+    vertical-align: middle;
+	margin-left: 10px;
+}
+
+.edd-testing-plugin-admin-left-side-navigation{
+    display: table-cell;
+	vertical-align:top;
+	min-width:190px;
+}
+.edd-testing-plugin-admin-left-side-navigation > ul{
+	margin:0;
+	background-color: #eaeaea;
+}
+.edd-testing-plugin-admin-left-side-navigation > ul > li > ul{
+	background-color: #f1f1f1;
+}
+.edd-testing-plugin-admin-left-side-navigation ul li {
+	display: block;
+    color: #444;
+    font-size: 12px;
+    border-bottom: 1px solid #e5e5e5;
+    margin-bottom: 0;
+    -webkit-hyphens: auto;
+    -moz-hyphens: auto;
+    -ms-hyphens: auto;
+    hyphens: auto;
+    word-wrap: break-word;
+}
+.edd-testing-plugin-admin-left-side-navigation ul li button {
+	background-color: transparent;
+    color: #444;
+    text-decoration: none;
+	border:none;
+	padding: 8px 10px 8px 6px;
+	width:100%;
+	text-align:left;
+	outline: none;
+	cursor: pointer;
+}
+.edd-testing-plugin-admin-left-side-navigation .edd-testing-plugin-admin-left-tab-text{
+	margin-left:10px;
+	vertical-align:middle;
+}
+.edd-testing-plugin-admin-left-side-navigation .edd-testing-plugin-current-tab > button{
+	box-shadow: inset -5px 0px 0px #00a0d2;
+}
+.edd-testing-plugin-admin-current-view-container{
+	display: table-cell;
+	vertical-align: top;
+	padding: 20px;
+	background-color: #fff;
+	border-left: 1px solid #e5e5e5;
+	margin-left: -1px;
+	min-height: 200px;
+	width: 100%;
+	z-index: 2;
+}
+
+/* Define Tests View */
+.edd-testing-plugin-admin-define-tests-view {
+	width:100%;
+}
+
+/* JSON Helper View */
+.edd-testing-plugin-helper-json textarea,
+.edd-testing-plugin-helper-json input[type="text"]{
+	width:100%;
+}
+.edd-testing-plugin-helper-json .edd-testing-plugin-multiple-checkboxes-level{
+	margin-left:20px;
+}
+.edd-testing-plugin-helper-json .edd-testing-plugin-testing-values,
+.edd-testing-plugin-helper-json .edd-testing-plugin-add-variant-button{
+	margin:5px;
+}
+.edd-testing-plugin-generate-testing-json-area{
+	margin-top:10px;
+}
+
+/* Admin Lightbox */
+.edd-testing-plugin-admin-lightbox{
+	transition: opacity .1s ease;
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	opacity:0;
+	z-index: 0;
+}
+.edd-testing-plugin-admin-lightbox.edd-testing-plugin-lightbox-closed{
+	display:none;
+}
+.edd-testing-plugin-admin-lightbox.edd-testing-plugin-lightbox-open{
+	position: fixed;
+	top: 0px;
+	left: 0px;
+	right: 0px;
+	bottom: 0px;
+	opacity:1;
+	z-index: 9999999;
+}
+.edd-testing-plugin-admin-lightbox-background{
+	background-color: rgba(0, 0, 0, 0.6);
+	position:relative;
+	width: 100%;
+    height: 100%;
+}
+.edd-testing-plugin-admin-lightbox-relative{
+	position:relative;
+    height: 100%;
+}
+.edd-testing-plugin-admin-lightbox-absolute{
+	position: fixed;
+	top: 20%;
+	left: calc(50% - 300px);
+}
+.edd-testing-plugin-admin-lightbox-inner{
+	width: 100%;
+	max-width: 600px;
+	padding: 10px;
+	background-color: #ffffff;
+}
+.edd-testing-plugin-admin-lightbox-title,
+.edd-testing-plugin-admin-lightbox-input-description,
+.edd-testing-plugin-admin-lightbox-input-description p{
+	margin:0px 0px 3px 0px;
+}
+.edd-testing-plugin-admin-lightbox-input-description *{
+	max-width:100%;
+}
