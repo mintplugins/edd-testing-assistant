@@ -36,8 +36,9 @@ function edd_testing_plugin_admin_enqueue_scripts(){
 
 	wp_localize_script( 'edd_testing_plugin_admin_js', 'edd_testing_plugin_admin_js_vars',
 		array(
-			'ajaxurl' => get_bloginfo( 'wpurl' ),
-			'settings_and_views' => edd_testing_plugin_get_views_and_settings()
+			'ajaxurl' => get_bloginfo( 'url' ),
+			'ajax_nonce_value' => wp_create_nonce( 'edd_testing_plugin_update_scenario_nonce' ),
+			'settings_and_views' => edd_testing_plugin_get_views_and_settings(),
 		)
 	);
 

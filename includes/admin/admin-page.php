@@ -46,7 +46,7 @@ function edd_testing_plugin_get_views_and_settings(){
 	// Set up the views here
 	$edd_testing_plugin_admin_views_and_settings = array(
 		'get_started' => array(
-			'visual_name' => '1. Get started',
+			'visual_name' => 'Get started',
 			'description' => edd_testing_plugin_get_started_description(),
 			'react_component' => 'helper_json_view',
 			'scenario_generation_options' => array(
@@ -59,14 +59,14 @@ function edd_testing_plugin_get_views_and_settings(){
 			),
 		),
 		'define_scenarios' => array(
-			'visual_name' => '2. Define scenarios',
-			'react_component' => 'define_tests_view',
-			'description' => __( 'Paste helper JSON into the box below to define the testing scenarios', 'edd-testing-plugin' ),
+			'visual_name' => '1. Define scenarios',
+			'react_component' => 'define_scenarios',
+			'description' => __( 'Paste testing JSON into the box below to define the testing scenarios', 'edd-testing-plugin' ),
 		),
 		'run_scenarios' => array(
-			'visual_name' => '3. Run scenarios',
+			'visual_name' => '2. Run scenarios',
 			'react_component' => 'run_scenarios',
-			'description' => __( 'Based on the Helper JSON, here are the scenarios that need to be tested.', 'edd-testing-plugin' ),
+			'description' => __( 'Based on the testing JSON, here are the scenarios that need to be tested.', 'edd-testing-plugin' ),
 		),
 	);
 
@@ -76,9 +76,7 @@ function edd_testing_plugin_get_views_and_settings(){
 
 function edd_testing_plugin_get_started_description() {
 
-	return __( 'Use this page if you are "leading the charge" on testing a new set of scenarios. Otherwise, you may wish to obtain a JSON file from a colleague, to ensure you are running the same scenarios. If there is any difference in your JSON files, your scenario numbers will not be in alignment.
-
-	This tab generates JSON to help you get started. It contains as many scenarios as it can on its own. But you will likely want to add your own custom scenarios to it. For example, you might want to test a 50% discount code, and a 20% discount code. To do that, copy this JSON into your favourite text editor. From there, add/remove any setting/value you want to have as part of the testing scenarios.', 'edd-testing-plugin' );
+	return __( 'This page generates testing JSON, which powers the EDD Testing Assistant. Use this page if you are "leading the charge" on testing a new set of scenarios. Otherwise, you may wish to obtain the testing JSON file from a colleague, to ensure you are running the same scenarios. If there is any difference in your JSON files, your scenario numbers will not be in alignment.', 'edd-testing-plugin' );
 }
 
 function edd_testing_plugin_get_svg_icon() {

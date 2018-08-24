@@ -158,111 +158,11 @@ function edd_testing_plugin_get_possible_options( $strip_api_keys = false ){
 
 	}
 
-	// Output a saveable json file, which the tester can manually fill in with their desired default values in the code-editor of their choice.
 	return $usable_array_of_possible_values;
 
 }
 
-// This function will return a JSON array which contains all of the possible settings, with some default values inserted to help define tests.
-function edd_testing_plugin_generate_helper_json( $strip_api_keys = false ){
-
-	$possible_values = array();
-
-	$edd_settings = edd_get_registered_settings();
-
-	// Loop through each top tab in the admin settings
-	foreach( $edd_settings as $top_tab_key => $top_tab ) {
-
-		// Skip the general tab as these options don't typically affect anything
-		if ( 'general' == $top_tab_key ) {
-			continue;
-		}
-
-		// Loop through each page directly under a top tab in the admin settings
-		foreach( $top_tab as $page_settings_key => $page_settings ) {
-
-			// All tests will be done in test mode, so test mode can be skipped.
-			if ( 'gateways' == $top_tab_key &&
-				'test_mode' == $page_settings_key
-			) {
-				continue;
-			}
-
-			// Loop through each setting on a sub tab admin menu page
-			foreach( $page_settings as $setting_key => $setting ) {
-
-				// Test mode exists twice in the EDD settings, so skip that here too.
-				if ( 'gateways' == $top_tab_key &&
-					'test_mode' == $setting_key
-				) {
-					continue;
-				}
-
-				// Skip certain types of fields that aren't actual variables, but mere placeholders or information displayers.
-				if (
-					isset( $setting['type'] ) &&
-					(
-					'header' == $setting['type'] ||
-					'hook' == $setting['type'] ||
-					'descriptive_text' == $setting['type']
-					)
-				) {
-
-					// Skip these fields because they are not actual settings
-					continue;
-
-				} else if ( ! isset( $setting['type'] ) ) {
-
-					// If this field has an ID, retrieve its value and use it for the tests. Otherwise, it will be excluded from the tests.
-					if ( isset( $setting['id'] ) ) {
-
-						$possible_values[$top_tab_key][$page_settings_key][$setting['id']]['testing_values'] = edd_testing_plugin_get_values_for_testing( $setting );
-					}
-
-				} else if ( 'checkbox' == $setting['type'] ) {
-
-					if ( isset( $setting['id'] ) ) {
-						$possible_values[$top_tab_key][$page_settings_key][$setting['id']]['testing_values'] = array( 'checked', 'unchecked' );
-					}
-
-				} else if ( 'select' == $setting['type'] || 'radio' == $setting['type'] ) {
-
-					if ( isset( $setting['id'] ) ) {
-
-						$setting_options = array();
-
-						foreach( $setting['options'] as $setting_option_key => $setting_option ) {
-							$setting_options[] = $setting_option_key;
-						}
-
-						$possible_values[$top_tab_key][$page_settings_key][$setting['id']]['testing_values'] = $setting_options;
-					}
-
-				} else if( 'gateways' == $setting['type'] ) {
-
-					// Loop through each possible gateway and add a checkbox enabled/disabled scenario for each
-					foreach( $setting['options'] as $possibly_enabled_gateway_key => $possibly_enabled_gateway ) {
-						$possible_values[$top_tab_key][$page_settings_key][$possibly_enabled_gateway_key] = array( 'checked', 'unchecked' );
-					}
-
-				} else {
-
-					// If this field doesn't all into any of the above conditions for any reason
-					if ( isset( $setting['id'] ) ) {
-
-						$possible_values[$top_tab_key][$page_settings_key][$setting['id']]['testing_values'] = edd_testing_plugin_get_values_for_testing( $setting, $strip_api_keys );
-					}
-
-				}
-			}
-		}
-	}
-
-	// Output a saveable json file, which the tester can manually fill in with their desired default values in the code-editor of their choice.
-	return $possible_values;
-
-}
-
+// This function is used by the edd_testing_plugin_get_possible_options function to get the best default value for a setting
 function edd_testing_plugin_get_values_for_testing( $setting, $strip_api_keys = false ) {
 
 	$values_for_testing = array();

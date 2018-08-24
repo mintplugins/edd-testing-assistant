@@ -8,7 +8,6 @@ edd-testing-plugin-admin/* Fix bad css in WP core */
 
 .edd-testing-plugin-admin-container{
 	width:100%;
-	max-width:830px;
 	background: #f5f5f5;
     border: 1px solid #e5e5e5;
     webkit-box-shadow: 0 1px 1px rgba(0,0,0,.04);
@@ -110,8 +109,12 @@ edd-testing-plugin-admin/* Fix bad css in WP core */
 .edd-testing-plugin-helper-json .edd-testing-plugin-add-variant-button{
 	margin:5px;
 }
-.edd-testing-plugin-generate-testing-json-area{
+.edd-testing-plugin-generate-testing-json-area,
+.edd-testing-plugin-scenario-instructions-and-results-area{
 	margin-top:25px;
+}
+.edd-testing-plugin-scenario-instructions{
+	margin-top:15px;
 }
 
 /* Define Tests View */
@@ -127,14 +130,79 @@ edd-testing-plugin-admin/* Fix bad css in WP core */
 }
 
 /* Run Tests View */
+.edd-testing-plugin-admin-run-scenarios-view{
+	width:100%;
+}
 .edd-testing-plugin-admin-settings .edd-testing-plugin-scenario-link{
 	margin:5px;
 }
 .edd-testing-plugin-admin-settings .edd-testing-plugin-scenario-link:first-child{
 	margin-left:0px;
 }
+.edd-testing-plugin-current-scenario-area{
+	margin-top:20px;
+}
+.edd-testing-plugin-settings-values-table{
+	display: inline-grid;
+	grid-template-columns: auto;
+}
 .edd-testing-plugin-scenario-setting{
-	margin: 5px 0px;
+	display:inline-grid;
+	grid-template-columns: 270px 1fr;
+}
+.edd-testing-plugin-scenario-setting:nth-child(odd){
+	background-color: #f5f5f5;
+}
+.edd-testing-plugin-scenario-setting-name{
+	padding:5px;
+}
+.edd-testing-plugin-scenario-setting-value{
+	padding:5px;
+}
+.edd-testing-plugin-current-scenario-title{
+	font-size:16px;
+}
+.edd-testing-plugin-testing-area{
+	margin-top:30px;
+	background-color: #f5f5f5;
+    padding: 10px;
+}
+.edd-testing-plugin-testing-area,
+.edd-testing-plugin-testing-area iframe{
+	width:100%;
+	height:1000px;
+}
+.edd-testing-plugin-instruction-area{
+	margin-top:10px;
+}
+.edd-testing-plugin-testing-instructions,
+.edd-testing-plugin-testing-expected-results{
+	display: inline-block;
+    width: 48%;
+    background: #f5f5f5;
+	padding:10px;
+	vertical-align:top;
+}
+.edd-testing-plugin-testing-instructions{
+	margin-right:1%;
+}
+.edd-testing-plugin-setting-scenario-data{
+	display: inline-block;
+    margin-top: 15px;
+	padding:5px;
+	background-color:#fffc9d;
+}
+.edd-testing-plugin-scenario-data-set{
+	display: inline-block;
+    margin-top: 15px;
+	padding:5px;
+	background-color:#d0f8cd;
+}
+.edd-testing-plugin-scenario-data-not-set{
+	display: inline-block;
+    margin-top: 15px;
+	padding:5px;
+	background-color: #cc0000;
 }
 
 /* Admin Lightbox */
