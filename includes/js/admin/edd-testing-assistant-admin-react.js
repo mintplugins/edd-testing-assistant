@@ -1,5 +1,5 @@
 /*
- * EDD Testing Plugin Admin
+ * EDD Testing Assistant Admin
  * https://www.easydigitaldownloads.com
  *
  * Licensed under the GPL license.
@@ -10,7 +10,7 @@
  */
 
 
-window.edd_testing_plugin_admin_lightbox_vars = {
+window.edd_testing_assistant_admin_lightbox_vars = {
     title: null,
     description: null,
 };
@@ -26,7 +26,8 @@ window.EDD_Testing_Plugin_Admin = class EDD_Testing_Plugin_Admin extends React.C
             current_view: 'define_scenarios', //get_started, define_scenarios
             options_to_test: {},
             total_scenarios: 1,
-            all_scenarios: {}
+            all_scenarios: {},
+            scenarios_are_fresh: false
         };
 
         this.get_current_view_class = this.get_current_view_class.bind( this );
@@ -39,22 +40,37 @@ window.EDD_Testing_Plugin_Admin = class EDD_Testing_Plugin_Admin extends React.C
             [state_key]: state_value
         }, function() {
 
+            console.log( 'updating parent state ' );
+            console.log( this.state.options_to_test );
+
             // Update the number of scenarios in json as well to match the new state
             var data = update_total_scenarios( this.state.options_to_test, this.state.all_scenarios );
 
             this.setState( {
                 total_scenarios: data['scenario_counter'],
                 all_scenarios: data['all_scenarios'],
+                scenarios_are_fresh: true,
             } );
 
         } );
 
     }
 
+    componentDidUpdate() {
+
+        // If the fresh scenarios have been passed-down to the child components
+        if ( this.state.scenarios_are_fresh ) {
+            this.setState( {
+                scenarios_are_fresh: false
+            } );
+        }
+
+    }
+
     get_current_view_class( view_in_question ) {
 
-        var currently_in_view_class_name = 'edd-testing-plugin-current-view';
-        var hidden_class_name = 'edd-testing-plugin-hidden-view';
+        var currently_in_view_class_name = 'edd-testing-assistant-current-view';
+        var hidden_class_name = 'edd-testing-assistant-hidden-view';
 
         // If the current visual state matches the view we are getting the class for
         if( this.state.current_view == view_in_question ) {
@@ -71,7 +87,7 @@ window.EDD_Testing_Plugin_Admin = class EDD_Testing_Plugin_Admin extends React.C
 
     get_current_button_class( view_in_question ) {
 
-        var current_button_class_name = 'edd-testing-plugin-current-tab';
+        var current_button_class_name = 'edd-testing-assistant-current-tab';
 
         // If the current visual state matches the view we are getting the class for
         if( this.state.current_view == view_in_question ) {
@@ -122,9 +138,21 @@ window.EDD_Testing_Plugin_Admin = class EDD_Testing_Plugin_Admin extends React.C
         // This lets us loop through the object
         for (var key in views ) {
 
-            var DynamicReactComponent = edd_testing_plugin_string_to_component( views[key]['react_component'] );
+            var DynamicReactComponent = edd_testing_assistant_string_to_component( views[key]['react_component'] );
 
-            mapper.push( <DynamicReactComponent key={ key } view_slug={ key } view_info={ views[key] } current_view={ this.state.current_view } current_view_class={ this.get_current_view_class( key ) } update_parent_state={ this.update_state.bind( this ) } all_scenarios={ this.state.all_scenarios } ajaxurl={ this.props.ajaxurl } ajax_nonce={ this.props.ajax_nonce } /> )
+            mapper.push( <DynamicReactComponent
+                key={ key }
+                view_slug={ key }
+                view_info={ views[key] }
+                current_view={ this.state.current_view }
+                current_view_class={ this.get_current_view_class( key ) }
+                update_parent_state={ this.update_state.bind( this ) }
+                all_scenarios={ this.state.all_scenarios }
+                ajaxurl={ this.props.ajaxurl }
+                ajax_nonce={ this.props.ajax_nonce }
+                scenarios_are_fresh={ this.state.scenarios_are_fresh }
+                options_to_test={ this.state.options_to_test }
+            /> )
         }
 
         // This lets us output the buttons one by one
@@ -137,14 +165,14 @@ window.EDD_Testing_Plugin_Admin = class EDD_Testing_Plugin_Admin extends React.C
     render() {
 
         return (
-            <div className={ 'edd-testing-plugin-admin-container edd-testing-plugin-current-view-is-' + this.state.current_view }>
-                <div className="edd-testing-plugin-admin-left-side-navigation">
+            <div className={ 'edd-testing-assistant-admin-container edd-testing-assistant-current-view-is-' + this.state.current_view }>
+                <div className="edd-testing-assistant-admin-left-side-navigation">
                     <ul>
                         { this.render_left_side_navigation_buttons() }
                     </ul>
                 </div>
 
-                <div className='edd-testing-plugin-admin-current-view-container'>
+                <div className='edd-testing-assistant-admin-current-view-container'>
                     { this.render_actual_views( this.views ) }
                 </div>
 
@@ -193,9 +221,9 @@ window.EDD_Testing_Plugin_View_Button = class EDD_Testing_Plugin_View_Button ext
     render() {
 
         return (
-            <li className={ "edd-testing-plugin-admin-left-tab-button" + this.props.get_current_button_class( this.props.view_slug )  }>
+            <li className={ "edd-testing-assistant-admin-left-tab-button" + this.props.get_current_button_class( this.props.view_slug )  }>
                 <button onClick={ this.props.set_current_view.bind( null, this.props.view_slug ) }>
-                    <span className="edd-testing-plugin-admin-left-tab-text" aria-hidden="true">{ this.props.view_info.visual_name }</span>
+                    <span className="edd-testing-assistant-admin-left-tab-text" aria-hidden="true">{ this.props.view_info.visual_name }</span>
                 </button>
                 <ul>
                     { this.render_submenu() }
@@ -216,7 +244,7 @@ window.EDD_Testing_Plugin_Helper_JSON_View = class EDD_Testing_Plugin_Helper_JSO
             component_has_mounted: false,
             options_to_test: {},
             total_scenarios: 1,
-            all_scenarios: {}
+            all_scenarios: {},
         }
 
     }
@@ -235,6 +263,8 @@ window.EDD_Testing_Plugin_Helper_JSON_View = class EDD_Testing_Plugin_Helper_JSO
                 all_scenarios: data['all_scenarios'],
             } );
 
+            this.props.update_parent_state( state_key, state_value );
+
         } );
 
     }
@@ -245,7 +275,7 @@ window.EDD_Testing_Plugin_Helper_JSON_View = class EDD_Testing_Plugin_Helper_JSO
 
         // This lets us loop through the object
         for (var key in options) {
-            mapper.push( <div key={key} className={ 'edd-testing-plugin-helper-json-option'}>
+            mapper.push( <div key={key} className={ 'edd-testing-assistant-helper-json-option'}>
                 { this.render_option( options[key], key ) }
             </div> )
         }
@@ -259,15 +289,15 @@ window.EDD_Testing_Plugin_Helper_JSON_View = class EDD_Testing_Plugin_Helper_JSO
 
     render_option( option, key ){
 
-        var DynamicReactComponent = edd_testing_plugin_string_to_component( option['react_component'] );
+        var DynamicReactComponent = edd_testing_assistant_string_to_component( option['react_component'] );
 
         if ( DynamicReactComponent ) {
 
             return (
-                <div className="edd-testing-plugin-helper-json-option">
+                <div className="edd-testing-assistant-helper-json-option">
                     <div><strong>{ option.visual_title }</strong></div>
                     <p>{ option.visual_description }</p>
-                    <div>{ <DynamicReactComponent key={ key } option_info={ option } update_parent_state={ this.update_state.bind( this ) } all_scenarios={ this.state.all_scenarios } /> }</div>
+                    <div>{ <DynamicReactComponent key={ key } option_info={ option } update_parent_state={ this.update_state.bind( this ) } all_scenarios={ this.state.all_scenarios } options_to_test={ this.props.options_to_test } scenarios_are_fresh={ this.props.scenarios_are_fresh } /> }</div>
                 </div>
             )
         }
@@ -294,18 +324,18 @@ window.EDD_Testing_Plugin_Helper_JSON_View = class EDD_Testing_Plugin_Helper_JSO
         }, null, 2 );
 
         return (
-            <div className={ 'edd-testing-plugin-admin-helper-json-view' + this.props.current_view_class }>
-                <div className="edd-testing-plugin-admin-view-title">
+            <div className={ 'edd-testing-assistant-admin-helper-json-view' + this.props.current_view_class }>
+                <div className="edd-testing-assistant-admin-view-title">
                     <h2>{ this.props.view_info.visual_name }</h2>
                 </div>
-                <div className={ 'edd-testing-plugin-admin-view-description' }>
+                <div className={ 'edd-testing-assistant-admin-view-description' }>
                     <p>{ this.props.view_info.description }</p>
                 </div>
-                <div className={ 'edd-testing-plugin-helper-json' }>
+                <div className={ 'edd-testing-assistant-helper-json' }>
 
-                    <div className="edd-testing-plugin-helper-json-form">
+                    <div className="edd-testing-assistant-helper-json-form">
 
-                        <div className="edd-testing-plugin-helper-json-options">
+                        <div className="edd-testing-assistant-helper-json-options">
                             { this.render_options( this.props.view_info.scenario_generation_options ) }
                         </div>
 
@@ -313,10 +343,10 @@ window.EDD_Testing_Plugin_Helper_JSON_View = class EDD_Testing_Plugin_Helper_JSO
 
                     <EDD_Testing_Plugin_Build_Scenarios total_scenarios={ this.state.total_scenarios }  all_scenarios={ this.state.all_scenarios } update_parent_state={ this.update_state.bind( this ) } />
 
-                    <div className="edd-testing-plugin-generate-testing-json-area">
+                    <div className="edd-testing-assistant-generate-testing-json-area">
                         <h2>{ 'Generate Testing JSON' } </h2>
                         <p>{ 'Based on the above selection, ' + this.state.total_scenarios + ' scenario(s) need to be tested. Copy the helper JSON and move on to the next step called "Define Scenarios". It is recommended that the helper JSON been pasted into the relating GitHub issue so that others can easily run the same series of tests.' }</p>
-                        <a className="edd-testing-plugin-copy-json-button button" onClick={ edd_testing_plugin_copy_text_to_clipboard.bind( null, json_stringified ) }>{ 'Copy helper JSON' }</a> <a className="button" href={ 'data:text/json;charset=utf-8,' + encodeURIComponent( json_stringified ) } download={ 'test.json' }>{ 'Download helper JSON file' }</a>
+                        <a className="edd-testing-assistant-copy-json-button button" onClick={ edd_testing_assistant_copy_text_to_clipboard.bind( null, json_stringified ) }>{ 'Copy helper JSON' }</a> <a className="button" href={ 'data:text/json;charset=utf-8,' + encodeURIComponent( json_stringified ) } download={ 'test.json' }>{ 'Download helper JSON file' }</a>
                     </div>
 
                 </div>
@@ -371,12 +401,14 @@ window.EDD_Testing_Plugin_Define_Scenarios_View = class EDD_Testing_Plugin_Defin
         // If what was entered is valid json, pass it up to the parent so it can be broken-out into scenarios
         if ( is_valid ) {
 
+            console.log( 'about to update parent state' );
+
             // Update the options to test in the parent, which will trigger a calculation of the scenarios
             this.props.update_parent_state( 'options_to_test', helper_object['options_to_test'] );
             this.props.update_parent_state( 'all_scenarios', helper_object['all_scenarios'] );
 
             // Set the view to be the "Run Scenarios" step
-            this.props.update_parent_state( 'current_view', 'run_scenarios' );
+            //this.props.update_parent_state( 'current_view', 'run_scenarios' );
 
         }
 
@@ -390,23 +422,23 @@ window.EDD_Testing_Plugin_Define_Scenarios_View = class EDD_Testing_Plugin_Defin
         }
 
         if ( helper_json_valid ) {
-            return ' ' + 'edd-testing-plugin-json-helper-valid';
+            return ' ' + 'edd-testing-assistant-json-helper-valid';
         } else {
-            return ' ' + 'edd-testing-plugin-json-helper-invalid';
+            return ' ' + 'edd-testing-assistant-json-helper-invalid';
         }
     }
 
     render() {
 
         return (
-            <div className={ 'edd-testing-plugin-admin-define-tests-view' + this.props.current_view_class }>
-                <div className="edd-testing-plugin-admin-view-title">
+            <div className={ 'edd-testing-assistant-admin-define-tests-view' + this.props.current_view_class }>
+                <div className="edd-testing-assistant-admin-view-title">
                     <h2>{ this.props.view_info.visual_name }</h2>
                 </div>
-                <div className={ 'edd-testing-plugin-admin-view-description' }>
+                <div className={ 'edd-testing-assistant-admin-view-description' }>
                     { this.props.view_info.description }
                 </div>
-                <div className={ 'edd-testing-plugin-helper-json-paste-area' + this.helper_json_valid_class_name( this.state.helper_json_valid ) }>
+                <div className={ 'edd-testing-assistant-helper-json-paste-area' + this.helper_json_valid_class_name( this.state.helper_json_valid ) }>
                     <textarea value={ this.state.helper_json } onChange={ this.handle_helper_json_change.bind( null ) }></textarea>
                 </div>
             </div>
@@ -425,7 +457,6 @@ window.EDD_Testing_Plugin_Build_Scenarios = class EDD_Testing_Plugin_Build_Scena
             current_scenario: 1,
         };
 
-        this.input_delay = null;
         this.input_delay = null;
         this.set_current_scenario = this.set_current_scenario.bind( this );
         this.handle_instruction_change = this.handle_instruction_change.bind( this );
@@ -501,7 +532,7 @@ window.EDD_Testing_Plugin_Build_Scenarios = class EDD_Testing_Plugin_Build_Scena
         // Loop through each scenario and output a link to it
         for( var scenario in all_scenarios ) {
 
-            mapper.push( <button key={ scenario } className={ 'edd-testing-plugin-scenario-link button' + this.get_current_scenario_button_class( scenario )  } onClick={ this.set_current_scenario.bind( null, scenario ) }>
+            mapper.push( <button key={ scenario } className={ 'edd-testing-assistant-scenario-link button' + this.get_current_scenario_button_class( scenario )  } onClick={ this.set_current_scenario.bind( null, scenario ) }>
                 { scenario }
             </button> );
         }
@@ -518,9 +549,9 @@ window.EDD_Testing_Plugin_Build_Scenarios = class EDD_Testing_Plugin_Build_Scena
 
         // Loop through all of the settings in the current scenario
         for( var setting in all_scenarios[current_scenario]['values'] ) {
-            mapper.push( <div key={ setting } className={ 'edd-testing-plugin-scenario-setting' }>
-                <span className={ 'edd-testing-plugin-scenario-setting-name' }><strong>{ setting }</strong>: </span>
-                <span className={ 'edd-testing-plugin-scenario-setting-value' }>{ all_scenarios[current_scenario]['values'][setting]['value'] }</span>
+            mapper.push( <div key={ setting } className={ 'edd-testing-assistant-scenario-setting' }>
+                <span className={ 'edd-testing-assistant-scenario-setting-name' }><strong>{ setting }</strong>: </span>
+                <span className={ 'edd-testing-assistant-scenario-setting-value' }>{ all_scenarios[current_scenario]['values'][setting]['value'] }</span>
             </div> );
         }
 
@@ -535,41 +566,41 @@ window.EDD_Testing_Plugin_Build_Scenarios = class EDD_Testing_Plugin_Build_Scena
         if ( this.props.all_scenarios[this.state.current_scenario] ) {
 
             return (
-                <div className="edd-testing-plugin-scenario-instructions-and-results-area">
+                <div className="edd-testing-assistant-scenario-instructions-and-results-area">
                     <h2>Enter scenario instructions and expected results</h2>
                     <p>{ 'Based on the above selection, ' + this.props.total_scenarios + ' scenario(s) need to be tested. Enter the testing instructions for each scenario, as well as the expected results of each scenario. These instructions will be passed along to all other testers when you give them the Testing JSON.' }</p>
 
-                    <div className={ 'edd-testing-plugin-scenario-chooser-area' }>
+                    <div className={ 'edd-testing-assistant-scenario-chooser-area' }>
                         { this.render_scenario_links( this.props.all_scenarios, this.state.current_scenario ) }
                     </div>
 
-                    <div className={ 'edd-testing-plugin-scenario-instructions' }>
-                        <div className={ 'edd-testing-plugin-build-instructions-title' }>
+                    <div className={ 'edd-testing-assistant-scenario-instructions' }>
+                        <div className={ 'edd-testing-assistant-build-instructions-title' }>
                             <strong>{ 'Enter the instructions for testing scenario ' + this.state.current_scenario }</strong>
                             <textarea
                                 onChange={ this.handle_instruction_change.bind( null, 'instructions' ) }
-                                className={ 'edd-testing-plugin-instructions' }
+                                className={ 'edd-testing-assistant-instructions' }
                                 value={ this.state['instructions_' + this.state.current_scenario] }
                                 placeholder={ 'Enter the testing instructions for scenario ' + this.state.current_scenario }
                             />
                         </div>
                     </div>
 
-                    <div className={ 'edd-testing-plugin-scenario-expected-results' }>
-                        <div className={ 'edd-testing-plugin-build-instructions-title' }>
+                    <div className={ 'edd-testing-assistant-scenario-expected-results' }>
+                        <div className={ 'edd-testing-assistant-build-instructions-title' }>
                             <strong>{ 'Enter the results you expect to get when this scenario ' + this.state.current_scenario + ' has been tested' }</strong>
                             <textarea
                                 onChange={ this.handle_instruction_change.bind( null, 'expected_results' ) }
-                                className={ 'edd-testing-plugin-instructions' }
+                                className={ 'edd-testing-assistant-instructions' }
                                 value={ this.state['expected_results_' + this.state.current_scenario] }
                                 placeholder={ 'Enter the expected results for scenario ' + this.state.current_scenario }
                             />
                         </div>
                     </div>
 
-                    <div className={ 'edd-testing-plugin-current-scenario-area' }>
+                    <div className={ 'edd-testing-assistant-current-scenario-area' }>
                         <p><strong>{ 'The settings for scenario ' + this.state.current_scenario + ' are: ' }</strong></p>
-                        <div className={ 'edd-testing-plugin-settings-values-table' }>
+                        <div className={ 'edd-testing-assistant-settings-values-table' }>
                             { this.render_current_scenario( this.state.current_scenario, this.props.all_scenarios ) }
                         </div>
                     </div>
@@ -594,7 +625,7 @@ window.EDD_Testing_Plugin_Run_Scenarios = class EDD_Testing_Plugin_Run_Scenarios
             current_browser_tab: 1,
             has_been_in_view: false,
             scenario_data_set: false,
-            browser_tab_1_url: this.props.ajaxurl,
+            browser_tab_1_url: this.props.ajaxurl + '/checkout/',
             browser_tab_2_url: this.props.ajaxurl + '/wp-admin/',
             browser_tab_3_url: this.props.ajaxurl + '/wp-admin/',
             browser_tab_4_url: this.props.ajaxurl + '/wp-admin/',
@@ -603,7 +634,6 @@ window.EDD_Testing_Plugin_Run_Scenarios = class EDD_Testing_Plugin_Run_Scenarios
 
         this.set_current_scenario = this.set_current_scenario.bind( this );
         this.switch_browser_tab = this.switch_browser_tab.bind( this );
-        this.handle_iframe_loaded = this.handle_iframe_loaded.bind( this );
         this.render_browser = this.render_browser.bind( this );
         this.set_scenario_on_server = this.set_scenario_on_server.bind( this );
 
@@ -617,7 +647,7 @@ window.EDD_Testing_Plugin_Run_Scenarios = class EDD_Testing_Plugin_Run_Scenarios
             } );
         }
 
-        if ( ! this.state.has_been_in_view ) {
+        if ( ! this.state.has_been_in_view && 'attempting_to_set' != this.state.scenario_data_set ) {
             this.set_scenario_on_server();
         }
     }
@@ -630,7 +660,7 @@ window.EDD_Testing_Plugin_Run_Scenarios = class EDD_Testing_Plugin_Run_Scenarios
 
         // Now we will save the settings in EDD so they actually are ready to be tested
         var postData = JSON.stringify({
-            action: 'edd_testing_plugin_set_scenario',
+            action: 'edd_testing_assistant_set_scenario',
             current_scenario: this.state.current_scenario,
             all_scenarios: this.props.all_scenarios,
             nonce: this.props.ajax_nonce
@@ -638,7 +668,7 @@ window.EDD_Testing_Plugin_Run_Scenarios = class EDD_Testing_Plugin_Run_Scenarios
 
         var this_component = this;
 
-        fetch( this.props.ajaxurl + '?edd-testing-plugin-set-scenario', {
+        fetch( this.props.ajaxurl + '?edd-testing-assistant-set-scenario', {
             method: "POST",
             mode: "same-origin",
             credentials: "same-origin",
@@ -685,9 +715,12 @@ window.EDD_Testing_Plugin_Run_Scenarios = class EDD_Testing_Plugin_Run_Scenarios
 
         this.setState( {
             current_scenario: key
+        }, function() {
+
+            this.set_scenario_on_server();
+
         } );
 
-        this.set_scenario_on_server();
     }
 
     get_current_scenario_button_class( scenario_in_question ) {
@@ -706,7 +739,7 @@ window.EDD_Testing_Plugin_Run_Scenarios = class EDD_Testing_Plugin_Run_Scenarios
         // Loop through each scenario and output a link to it
         for( var scenario in all_scenarios ) {
 
-            mapper.push( <button key={ scenario } className={ 'edd-testing-plugin-scenario-link button' + this.get_current_scenario_button_class( scenario )  } onClick={ this.set_current_scenario.bind( null, scenario ) }>
+            mapper.push( <button key={ scenario } className={ 'edd-testing-assistant-scenario-link button' + this.get_current_scenario_button_class( scenario )  } onClick={ this.set_current_scenario.bind( null, scenario ) }>
                 { scenario }
             </button> );
         }
@@ -728,9 +761,9 @@ window.EDD_Testing_Plugin_Run_Scenarios = class EDD_Testing_Plugin_Run_Scenarios
         // Loop through all of the settings in the current scenario
         for( var setting in all_scenarios[current_scenario]['values'] ) {
 
-            mapper.push( <div key={ setting } className={ 'edd-testing-plugin-scenario-setting' }>
-                <div className={ 'edd-testing-plugin-scenario-setting-name' }><strong>{ setting }</strong>: </div>
-                <div className={ 'edd-testing-plugin-scenario-setting-value' }>{ all_scenarios[current_scenario]['values'][setting]['value'] }</div>
+            mapper.push( <div key={ setting } className={ 'edd-testing-assistant-scenario-setting' }>
+                <div className={ 'edd-testing-assistant-scenario-setting-name' }><strong>{ setting }</strong>: </div>
+                <div className={ 'edd-testing-assistant-scenario-setting-value' }>{ all_scenarios[current_scenario]['values'][setting]['value'] }</div>
             </div> );
         }
 
@@ -754,48 +787,25 @@ window.EDD_Testing_Plugin_Run_Scenarios = class EDD_Testing_Plugin_Run_Scenarios
         } );
     }
 
-    handle_iframe_loaded( browser_tab_id, event ) {
-
-        var iframe = document.getElementById( "edd-testing-plugin-browser-tab-" + browser_tab_id );
-
-        if ( iframe ) {
-            title = document.getElementById( "edd-testing-plugin-browser-tab-" + browser_tab_id ).contentDocument.title;
-
-            if ( title ) {
-
-                this.setState( {
-                    browser_tab_1_title: title
-                } );
-
-            }
-        }
-    }
-
     render_browser() {
-
-        return '';
 
         if ( this.state.has_been_in_view ) {
             return(
-                <div className={ 'edd-testing-plugin-testing-area' }>
-                    <div className='edd-testing-plugin-current-scenario-title'><strong>{ 'Testing Window:' }</strong></div>
+                <div className={ 'edd-testing-assistant-testing-area' }>
+                    <div className='edd-testing-assistant-current-scenario-title'><strong>{ 'Testing Window:' }</strong></div>
                     <p>{ 'Feel free to use the window below to run your test for this scenario:' }</p>
-                    <div className={ 'edd-testing-plugin-browser' }>
-                        <div className={ 'edd-testing-plugin-browser-address-bar' }>
+                    <div className={ 'edd-testing-assistant-browser' }>
+                        <div className={ 'edd-testing-assistant-browser-address-bar' }>
                             { this.state['browser_tab_' + this.state.current_browser_tab + '_url'] }
                         </div>
-                        <div className={ 'edd-testing-plugin-browser-tabs' }>
+                        <div className={ 'edd-testing-assistant-browser-tabs' }>
                             <button onClick={ this.switch_browser_tab.bind( null, 1 ) }>Tab 1</button>
                             <button onClick={ this.switch_browser_tab.bind( null, 2 ) }>Tab 2</button>
                             <button onClick={ this.switch_browser_tab.bind( null, 3 ) }>Tab 3</button>
-                            <button onClick={ this.switch_browser_tab.bind( null, 4 ) }>Tab 4</button>
-                            <button onClick={ this.switch_browser_tab.bind( null, 5 ) }>Tab 5</button>
                         </div>
-                        <iframe onChange={ this.handle_iframe_loaded.bind( null, 1 ) } id="edd-testing-plugin-browser-tab-1" hidden={ this.browser_tab_hidden_attribute( 1, this.state.current_browser_tab ) } src={ this.state.browser_tab_1_url }></iframe>
+                        <iframe hidden={ this.browser_tab_hidden_attribute( 1, this.state.current_browser_tab ) } src={ this.state.browser_tab_1_url }></iframe>
                         <iframe hidden={ this.browser_tab_hidden_attribute( 2, this.state.current_browser_tab ) } src={ this.state.browser_tab_2_url }></iframe>
                         <iframe hidden={ this.browser_tab_hidden_attribute( 3, this.state.current_browser_tab ) } src={ this.state.browser_tab_3_url }></iframe>
-                        <iframe hidden={ this.browser_tab_hidden_attribute( 4, this.state.current_browser_tab ) } src={ this.state.browser_tab_4_url }></iframe>
-                        <iframe hidden={ this.browser_tab_hidden_attribute( 5, this.state.current_browser_tab ) } src={ this.state.browser_tab_5_url }></iframe>
                     </div>
                 </div>
             )
@@ -813,17 +823,17 @@ window.EDD_Testing_Plugin_Run_Scenarios = class EDD_Testing_Plugin_Run_Scenarios
     render_scenario_has_been_set_text() {
         if ( 'attempting_to_set' == this.state.scenario_data_set ) {
             return (
-                <div className={ 'edd-testing-plugin-setting-scenario-data' }>Setting scenario data...</div>
+                <div className={ 'edd-testing-assistant-setting-scenario-data' }>Setting scenario data...</div>
             )
         }
         if ( this.state.scenario_data_set ) {
             return (
-                <div className={ 'edd-testing-plugin-scenario-data-set' }>Scenario data has been saved and set! You are ready to test.</div>
+                <div className={ 'edd-testing-assistant-scenario-data-set' }>{ 'Scenario data has been saved and set! You are ready to test scenario ' + this.state.current_scenario + '.' }</div>
             )
         }
 
         return (
-            <div className={ 'edd-testing-plugin-scenario-data-not-set' }>Unable to set scenario data! The nonce has likely timed out and you have to refresh.</div>
+            <div className={ 'edd-testing-assistant-scenario-data-not-set' }>Unable to set scenario data! The nonce has likely timed out and you have to refresh.</div>
         )
 
     }
@@ -835,29 +845,29 @@ window.EDD_Testing_Plugin_Run_Scenarios = class EDD_Testing_Plugin_Run_Scenarios
         }
 
         return (
-            <div className={ 'edd-testing-plugin-admin-run-scenarios-view' + this.props.current_view_class }>
-                <div className="edd-testing-plugin-admin-view-title">
+            <div className={ 'edd-testing-assistant-admin-run-scenarios-view' + this.props.current_view_class }>
+                <div className="edd-testing-assistant-admin-view-title">
                     <h2>{ this.props.view_info.visual_name }</h2>
                 </div>
-                <div className={ 'edd-testing-plugin-admin-view-description' }>
+                <div className={ 'edd-testing-assistant-admin-view-description' }>
                     { this.props.view_info.description }
                 </div>
-                <div className={ 'edd-testing-plugin-scenario-chooser-area' }>
+                <div className={ 'edd-testing-assistant-scenario-chooser-area' }>
                     { this.render_scenario_links( this.props.all_scenarios, this.state.current_scenario ) }
                     <div>{ this.render_scenario_has_been_set_text() }</div>
                 </div>
-                <div className={ 'edd-testing-plugin-current-scenario-area' }>
-                    <div className='edd-testing-plugin-current-scenario-title'><strong>{ 'Current Scenario: ' + this.state.current_scenario }</strong></div>
-                    <div className='edd-testing-plugin-instruction-area'>
-                        <div className="edd-testing-plugin-testing-instructions">
+                <div className={ 'edd-testing-assistant-current-scenario-area' }>
+                    <div className='edd-testing-assistant-current-scenario-title'><strong>{ 'Current Scenario: ' + this.state.current_scenario }</strong></div>
+                    <div className='edd-testing-assistant-instruction-area'>
+                        <div className="edd-testing-assistant-testing-instructions">
                             <strong>Testing Instructions:</strong> { this.get_testing_instructions( this.props.all_scenarios[this.state.current_scenario]['info']['instructions'] ) }
                         </div>
-                        <div className="edd-testing-plugin-testing-expected-results">
+                        <div className="edd-testing-assistant-testing-expected-results">
                             <strong>Expected Results:</strong> { this.get_testing_instructions( this.props.all_scenarios[this.state.current_scenario]['info']['expected_results'] ) }
                         </div>
                     </div>
                     <p>{ 'The settings for scenario ' + this.state.current_scenario + ' are: ' }</p>
-                    <div className={ 'edd-testing-plugin-settings-values-table' }>
+                    <div className={ 'edd-testing-assistant-settings-values-table' }>
                         { this.render_current_scenario( this.state.current_scenario, this.props.all_scenarios ) }
                     </div>
                 </div>
@@ -914,7 +924,7 @@ window.EDD_Testing_Plugin_Radio_Boolean = class EDD_Testing_Plugin_Radio_Boolean
 
     render() {
         return (
-            <div className={ 'edd-testing-plugin-radio-boolean-option' }>
+            <div className={ 'edd-testing-assistant-radio-boolean-option' }>
             Radio Boolan
             </div>
         );
@@ -930,6 +940,8 @@ window.EDD_Testing_Plugin_Multiple_Checkboxes = class EDD_Testing_Plugin_Multipl
         this.state = {
             options: this.props.option_info.options
         };
+
+        this.variant_input_delay = null;
 
         this.set_default_state_of_children_checkboxes = this.set_default_state_of_children_checkboxes.bind( this );
         this.handle_checkbox_change = this.handle_checkbox_change.bind( this );
@@ -951,8 +963,64 @@ window.EDD_Testing_Plugin_Multiple_Checkboxes = class EDD_Testing_Plugin_Multipl
                 // Create the new key
                 var new_key = state_prefix ? state_prefix + '||' + child_key : child_key;
 
-                // Set the state to be empty, or unchecked
-                state_holder[new_key] = '';
+                var path_to_child_group = new_key.split( '||' );
+
+                if ( 3 == path_to_child_group.length ) {
+
+                    // Check if this should be checked by default or not
+                    if (
+                        this.props.options_to_test[path_to_child_group[0]] &&
+                        this.props.options_to_test[path_to_child_group[0]][path_to_child_group[1]] &&
+                        this.props.options_to_test[path_to_child_group[0]][path_to_child_group[1]][path_to_child_group[2]]
+                    ) {
+
+                        // Set the state to be checked
+                        state_holder[new_key] = 'checked';
+
+                    } else {
+
+                        // Set the state to be empty, or unchecked
+                        state_holder[new_key] = '';
+
+                    }
+
+                }
+
+                if ( 2 == path_to_child_group.length ) {
+
+                    if(
+                        this.props.options_to_test[path_to_child_group[0]] &&
+                        this.props.options_to_test[path_to_child_group[0]][path_to_child_group[1]]
+                    ) {
+
+                        // Set the state to be checked
+                        state_holder[new_key] = 'checked';
+
+                    } else {
+
+                        // Set the state to be empty, or unchecked
+                        state_holder[new_key] = '';
+
+                    }
+
+                }
+
+                if ( 1 == path_to_child_group.length ) {
+
+                    if(
+                        this.props.options_to_test[path_to_child_group[0]]
+                    ) {
+
+                        // Set the state to be checked
+                        state_holder[new_key] = 'checked';
+
+                    } else {
+
+                        // Set the state to be empty, or unchecked
+                        state_holder[new_key] = '';
+
+                    }
+                }
 
                 // Loop through each group of children within this child and set the state for those as well
                 state_holder = this.set_default_state_of_children_checkboxes( children_to_set[child_key]['contents'], new_key, state_holder );
@@ -964,6 +1032,22 @@ window.EDD_Testing_Plugin_Multiple_Checkboxes = class EDD_Testing_Plugin_Multipl
 
     }
 
+    componentDidUpdate() {
+
+        if ( this.props.scenarios_are_fresh ) {
+            console.log( this.props.options_to_test );
+
+            var nested_checkboxes = this.state.options;
+            var state_holder = JSON.parse( JSON.stringify( this.state ) );
+
+            state_holder = this.set_default_state_of_children_checkboxes( nested_checkboxes, null, state_holder );
+
+            // Replace the entire state with the checkbox default values included
+            this.setState( state_holder );
+        }
+
+    }
+
     componentDidMount() {
 
         // Set the default state of all the checkboxes to be unchecked
@@ -972,6 +1056,7 @@ window.EDD_Testing_Plugin_Multiple_Checkboxes = class EDD_Testing_Plugin_Multipl
 
         state_holder = this.set_default_state_of_children_checkboxes( nested_checkboxes, null, state_holder );
 
+        // Replace the entire state with the checkbox default values included
         this.setState( state_holder, function() {
 
             this.setState( {
@@ -1075,14 +1160,20 @@ window.EDD_Testing_Plugin_Multiple_Checkboxes = class EDD_Testing_Plugin_Multipl
 
         // Set the state here too
         this.setState( {
-            options: options
+            [parent_key + '||' + ( testing_values_key + 1 ) ]: ''
         }, function() {
 
-            // Once the state has updated, re-generate the array of options to test
-            this.generate_array_of_options_to_test();
+            this.setState( {
+                options: options
+            }, function() {
 
-            // Set the keyboard focus on the newly created field
-            this.references_to_fields[parent_key + '-' + ( testing_values_key + 1 )].current.focus();
+                // Once the state has updated, re-generate the array of options to test
+                this.generate_array_of_options_to_test();
+
+                // Set the keyboard focus on the newly created field
+                this.references_to_fields[parent_key + '-' + ( testing_values_key + 1 )].current.focus();
+
+            } );
 
         } );
 
@@ -1124,25 +1215,35 @@ window.EDD_Testing_Plugin_Multiple_Checkboxes = class EDD_Testing_Plugin_Multipl
 
     }
 
-    save_variant( testing_values_key, path_to_child_group, event ) {
+    save_variant( testing_values_key, path_to_child_group, parent_key, event ) {
 
         var options = this.state.options;
+
+        // Set up a delay which waits to save the tip until .5 seconds after they stop typing.
+        if( this.variant_input_delay ) {
+            // Clear the keypress delay if the user just typed
+            clearTimeout( this.variant_input_delay );
+            this.variant_input_delay = null;
+        }
+
+        var this_component = this;
+        var new_value = event.target.value;
 
         // This could be made to be more dynamic, but for now, we'll assume all testing values are at the 2 level (0, 1, 2)
         var testing_values = options[path_to_child_group[0]]['contents'][path_to_child_group[1]]['contents'][path_to_child_group[2]]['testing_values'];
 
         // Update the variant value to the one just typed
-        testing_values[testing_values_key] = event.target.value;
+        testing_values[testing_values_key] = new_value;
 
         options[path_to_child_group[0]]['contents'][path_to_child_group[1]]['contents'][path_to_child_group[2]]['testing_values'] = testing_values;
 
         // Set the state here too
-        this.setState( {
+        this_component.setState( {
             options: options
         }, function() {
 
             // Once the state has updated, re-generate the array of options to test
-            this.generate_array_of_options_to_test();
+            this_component.generate_array_of_options_to_test();
 
         } );
 
@@ -1179,8 +1280,14 @@ window.EDD_Testing_Plugin_Multiple_Checkboxes = class EDD_Testing_Plugin_Multipl
             [name] : checked_value
         }, function() {
 
+            var this_component = this;
+
             // Once the state has updated, re-generate the array of options to test
-            this.generate_array_of_options_to_test();
+            setTimeout( function() {
+
+                this_component.generate_array_of_options_to_test();
+
+            }, 500);
 
         } );
 
@@ -1212,15 +1319,15 @@ window.EDD_Testing_Plugin_Multiple_Checkboxes = class EDD_Testing_Plugin_Multipl
             // Create a node reference for this field
             this.references_to_fields[parent_key + '-' + key] = React.createRef();
 
-            mapper.push( <div key={key} style={ hidden_style } className={ 'edd-testing-plugin-testing-values'}>
+            mapper.push( <div key={key} style={ hidden_style } className={ 'edd-testing-assistant-testing-values'}>
                 <input
                     type="text"
                     name={ parent_key }
                     className={ parent_key }
                     testing_key={ key }
-                    value={ testing_values[key] }
+                    value={ this.state.options[path_to_child_group[0]]['contents'][path_to_child_group[1]]['contents'][path_to_child_group[2]]['testing_values'][key] }
                     placeholder={ 'Replace me with your desired testing value' }
-                    onChange={ this.save_variant.bind( null, key, path_to_child_group ) }
+                    onChange={ this.save_variant.bind( null, key, path_to_child_group, parent_key ) }
                     onKeyDown={ this.handle_variant_key_press.bind( null, key, path_to_child_group, parent_key ) }
                     ref={ this.references_to_fields[parent_key + '-' + key] }
                 />
@@ -1228,7 +1335,7 @@ window.EDD_Testing_Plugin_Multiple_Checkboxes = class EDD_Testing_Plugin_Multipl
 
         }
 
-        mapper.push( <button key={ 'add_another_variant' } style={ hidden_style } className={ 'button edd-testing-plugin-add-variant-button' } onClick={ this.add_another_variant.bind( null, key, path_to_child_group, parent_key ) }>
+        mapper.push( <button key={ 'add_another_variant' } style={ hidden_style } className={ 'button edd-testing-assistant-add-variant-button' } onClick={ this.add_another_variant.bind( null, key, path_to_child_group, parent_key ) }>
             <span>Add another variant</span>
         </button> );
 
@@ -1269,11 +1376,11 @@ window.EDD_Testing_Plugin_Multiple_Checkboxes = class EDD_Testing_Plugin_Multipl
                 var name = key;
             }
 
-            mapper.push( <div key={key} hidden={ hidden } className={ 'edd-testing-plugin-multiple-checkboxes-option'}>
+            mapper.push( <div key={key} hidden={ hidden } className={ 'edd-testing-assistant-multiple-checkboxes-option'}>
                 <label>
                     <input type="checkbox" name={ name } onChange={ this.handle_checkbox_change.bind( null ) } checked={ this.state[name] } />{ checkboxes[key]['info']['visual_name'] }
                 </label>
-                <div className={ 'edd-testing-plugin-multiple-checkboxes-level'}>
+                <div className={ 'edd-testing-assistant-multiple-checkboxes-level'}>
                     { this.render_checkboxes( checkboxes[key]['contents'], name, true, parent_name, this.state[name] ) }
                     { this.render_variants( checkboxes[key], this.state[name], name ) }
                 </div>
@@ -1299,7 +1406,7 @@ window.EDD_Testing_Plugin_Multiple_Checkboxes = class EDD_Testing_Plugin_Multipl
         }
 
         return (
-            <div className={ 'edd-testing-plugin-multiple-checkboxes-option' }>
+            <div className={ 'edd-testing-assistant-multiple-checkboxes-option' }>
                 { this.render_checkboxes( this.state.options ) }
             </div>
         );
@@ -1329,9 +1436,9 @@ window.EDD_Testing_Plugin_Admin_Lightbox = class EDD_Testing_Plugin_Admin_Lightb
 
     get_lightbox_visible_class() {
         if ( this.props.lightbox_open ) {
-            return ' edd-testing-plugin-lightbox-open';
+            return ' edd-testing-assistant-lightbox-open';
         } else {
-            return ' edd-testing-plugin-lightbox-closed';
+            return ' edd-testing-assistant-lightbox-closed';
         }
     }
 
@@ -1368,7 +1475,7 @@ window.EDD_Testing_Plugin_Admin_Lightbox = class EDD_Testing_Plugin_Admin_Lightb
         if ( this.props.lightbox_open ) {
 
             return {
-                __html: edd_testing_plugin_markdown_converter.makeHtml( this.props.body )
+                __html: edd_testing_assistant_markdown_converter.makeHtml( this.props.body )
             };
 
         } else {
@@ -1382,13 +1489,13 @@ window.EDD_Testing_Plugin_Admin_Lightbox = class EDD_Testing_Plugin_Admin_Lightb
 
     render() {
         return (
-            <div className={ 'edd-testing-plugin-admin-lightbox' + this.get_lightbox_visible_class() }>
-                <div className={ 'edd-testing-plugin-admin-lightbox-background' } onClick={ this.toggle_lightbox.bind( null, this.props ) }></div>
-                <div className={ 'edd-testing-plugin-admin-lightbox-relative' }>
-                    <div className={ 'edd-testing-plugin-admin-lightbox-absolute' }>
-                        <div className={ 'edd-testing-plugin-admin-lightbox-inner' }>
-                            <h2 className={ 'edd-testing-plugin-admin-lightbox-input-title' }>{ this.render_title() }</h2>
-                            <div className={ 'edd-testing-plugin-admin-lightbox-input-description' } dangerouslySetInnerHTML={ this.render_body_html() } />
+            <div className={ 'edd-testing-assistant-admin-lightbox' + this.get_lightbox_visible_class() }>
+                <div className={ 'edd-testing-assistant-admin-lightbox-background' } onClick={ this.toggle_lightbox.bind( null, this.props ) }></div>
+                <div className={ 'edd-testing-assistant-admin-lightbox-relative' }>
+                    <div className={ 'edd-testing-assistant-admin-lightbox-absolute' }>
+                        <div className={ 'edd-testing-assistant-admin-lightbox-inner' }>
+                            <h2 className={ 'edd-testing-assistant-admin-lightbox-input-title' }>{ this.render_title() }</h2>
+                            <div className={ 'edd-testing-assistant-admin-lightbox-input-description' } dangerouslySetInnerHTML={ this.render_body_html() } />
                         </div>
                     </div>
                 </div>
@@ -1398,7 +1505,7 @@ window.EDD_Testing_Plugin_Admin_Lightbox = class EDD_Testing_Plugin_Admin_Lightb
 }
 
 // This function takes a setting, and returns values that should be tested.
-window.edd_testing_plugin_get_values_for_testing = function edd_testing_plugin_get_values_for_testing( setting, already_saved_values, remove_api_keys = true, include_blank_scenarios ) {
+window.edd_testing_assistant_get_values_for_testing = function edd_testing_assistant_get_values_for_testing( setting, already_saved_values, remove_api_keys = true, include_blank_scenarios ) {
 
 	// Right out of the gate, let's add a blank option, as it's possible for this option to be blank.
 	var values_for_testing = [];
@@ -1525,7 +1632,7 @@ window.scenario_looper = function scenario_looper( data, settings_and_variations
 
             // Add this variation to the current scenario array
             data['current_scenario'][setting_key] = {
-                context: 'edd_admin_setting',
+                context: settings_and_variations[setting_key]['context'],
                 value: settings_and_variations[setting_key]['testing_values'][i]
             };
 
@@ -1611,7 +1718,7 @@ window.update_total_scenarios = function update_total_scenarios( options_to_test
     return data;
 }
 
-window.edd_testing_plugin_copy_text_to_clipboard = function edd_testing_plugin_copy_text_to_clipboard( text, event ) {
+window.edd_testing_assistant_copy_text_to_clipboard = function edd_testing_assistant_copy_text_to_clipboard( text, event ) {
 
     event.preventDefault();
 
@@ -1624,7 +1731,7 @@ window.edd_testing_plugin_copy_text_to_clipboard = function edd_testing_plugin_c
 }
 
 // This function takes a string and turns it into the corresponding react object
-window.edd_testing_plugin_string_to_component = function edd_testing_plugin_string_to_component( component_name ) {
+window.edd_testing_assistant_string_to_component = function edd_testing_assistant_string_to_component( component_name ) {
 
     switch( component_name ) {
         case 'define_scenarios':
@@ -1648,18 +1755,18 @@ window.edd_testing_plugin_string_to_component = function edd_testing_plugin_stri
     }
 }
 
-window.edd_testing_plugin_refresh_all_admins = function edd_testing_plugin_refresh_all_admins(){
-    var edd_testing_plugin_admin_exists = document.querySelector( '.edd-testing-plugin-admin-settings' );
-    if ( edd_testing_plugin_admin_exists ) {
+window.edd_testing_assistant_refresh_all_admins = function edd_testing_assistant_refresh_all_admins(){
+    var edd_testing_assistant_admin_exists = document.querySelector( '.edd-testing-assistant-admin-settings' );
+    if ( edd_testing_assistant_admin_exists ) {
 
-        var edd_testing_plugin_admins = document.querySelectorAll( '.edd-testing-plugin-admin-settings' );
+        var edd_testing_assistant_admins = document.querySelectorAll( '.edd-testing-assistant-admin-settings' );
 
-        edd_testing_plugin_admins.forEach(function( edd_testing_plugin_admin ) {
+        edd_testing_assistant_admins.forEach(function( edd_testing_assistant_admin ) {
 
-            ReactDOM.render( <EDD_Testing_Plugin_Admin key={ 'edd-testing-plugin-admin' } views={ edd_testing_plugin_admin_js_vars.settings_and_views } ajaxurl={ edd_testing_plugin_admin_js_vars.ajaxurl } ajax_nonce={ edd_testing_plugin_admin_js_vars.ajax_nonce_value } />, edd_testing_plugin_admin );
+            ReactDOM.render( <EDD_Testing_Plugin_Admin key={ 'edd-testing-assistant-admin' } views={ edd_testing_assistant_admin_js_vars.settings_and_views } ajaxurl={ edd_testing_assistant_admin_js_vars.ajaxurl } ajax_nonce={ edd_testing_assistant_admin_js_vars.ajax_nonce_value } />, edd_testing_assistant_admin );
         });
 
     }
 }
 
-edd_testing_plugin_refresh_all_admins();
+edd_testing_assistant_refresh_all_admins();

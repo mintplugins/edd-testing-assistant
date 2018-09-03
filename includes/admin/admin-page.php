@@ -3,31 +3,34 @@
 /**
  * Create the button that shows in the main WordPres menu for this Codeable Test plugin
  */
-function edd_testing_plugin_settings_menu_button(){
+function edd_testing_assistant_settings_menu_button(){
 
-	$svg_icon = edd_testing_plugin_get_svg_icon();
+	$svg_icon = edd_testing_assistant_get_svg_icon();
 
 	$icon_url = 'data:image/svg+xml;base64,' . base64_encode( $svg_icon );
 
-	add_menu_page( 'EDD Testing Plugin', 'EDD Testing Plugin', 'activate_plugins', 'edd-testing-plugin', 'edd_testing_plugin_admin_page_output', $icon_url, 1 );
+	add_menu_page( 'EDD Testing Assistant', 'EDD Testing Assistant', 'activate_plugins', 'edd-testing-assistant', 'edd_testing_assistant_admin_page_output', $icon_url, 1 );
 
 }
-add_action('admin_menu', 'edd_testing_plugin_settings_menu_button');
+add_action('admin_menu', 'edd_testing_assistant_settings_menu_button');
 
 /**
  * This function outputs the HTMl that appears on the Codeable Test plugin page
  */
-function edd_testing_plugin_admin_page_output() {
+function edd_testing_assistant_admin_page_output() {
 
-	$svg_icon = edd_testing_plugin_get_svg_icon();
+	// Create the default products if they don't already exist
+	edd_testing_assistant_set_default_products();
+	
+	$svg_icon = edd_testing_assistant_get_svg_icon();
 
 	// This is all we output from PHP. The rest is handled through React JS.
 	?><div class="wrap">
-		<div class="edd-testing-plugin-admin-settings-title-area">
-			<span class="edd-testing-plugin-admin-settings-icon"><?php echo $svg_icon; ?></span>
-			<span class="edd-testing-plugin-admin-settings-title"><h2><?php echo __( 'EDD Testing Assistant', 'edd-testing-plugin' ); ?></h2></span>
+		<div class="edd-testing-assistant-admin-settings-title-area">
+			<span class="edd-testing-assistant-admin-settings-icon"><?php echo $svg_icon; ?></span>
+			<span class="edd-testing-assistant-admin-settings-title"><h2><?php echo __( 'EDD Testing Assistant', 'edd-testing-assistant' ); ?></h2></span>
 		</div>
-		<div class="edd-testing-plugin-admin-settings"><?php echo __( 'Loading...', 'edd-testing-plugin' ); ?></div>
+		<div class="edd-testing-assistant-admin-settings"><?php echo __( 'Loading...', 'edd-testing-assistant' ); ?></div>
 	</div>
 	<?php
 
@@ -39,47 +42,47 @@ function edd_testing_plugin_admin_page_output() {
  * @since    1.0.0
  * @return   array
  */
-function edd_testing_plugin_get_views_and_settings(){
+function edd_testing_assistant_get_views_and_settings(){
 
-	$saved_settings = get_option( 'edd_testing_plugin_settings' );
+	$saved_settings = get_option( 'edd_testing_assistant_settings' );
 
 	// Set up the views here
-	$edd_testing_plugin_admin_views_and_settings = array(
+	$edd_testing_assistant_admin_views_and_settings = array(
 		'get_started' => array(
 			'visual_name' => 'Get started',
-			'description' => edd_testing_plugin_get_started_description(),
+			'description' => edd_testing_assistant_get_started_description(),
 			'react_component' => 'helper_json_view',
 			'scenario_generation_options' => array(
 				'add_custom_scenarios' => array(
-					'visual_title' => __( 'Pick your scenarios', 'edd-testing-plugin' ),
+					'visual_title' => __( 'Pick your scenarios', 'edd-testing-assistant' ),
 					'react_component' => 'multiple_checkboxes',
-					'options' => edd_testing_plugin_get_possible_options( true ),
-					'description' => __( 'Include the relevant settings for which you would like to add scenarios. If you leave a setting unchecked, the saved-to-your-system value will be used, and a unique scenario relating to that setting will not be created.', 'edd-testing-plugin' ),
+					'options' => edd_testing_assistant_get_possible_options( true ),
+					'description' => __( 'Include the relevant settings for which you would like to add scenarios. If you leave a setting unchecked, the saved-to-your-system value will be used, and a unique scenario relating to that setting will not be created.', 'edd-testing-assistant' ),
 				),
 			),
 		),
 		'define_scenarios' => array(
 			'visual_name' => '1. Define scenarios',
 			'react_component' => 'define_scenarios',
-			'description' => __( 'Paste testing JSON into the box below to define the testing scenarios', 'edd-testing-plugin' ),
+			'description' => __( 'Paste testing JSON into the box below to define the testing scenarios', 'edd-testing-assistant' ),
 		),
 		'run_scenarios' => array(
 			'visual_name' => '2. Run scenarios',
 			'react_component' => 'run_scenarios',
-			'description' => __( 'Based on the testing JSON, here are the scenarios that need to be tested.', 'edd-testing-plugin' ),
+			'description' => __( 'Based on the testing JSON, here are the scenarios that need to be tested.', 'edd-testing-assistant' ),
 		),
 	);
 
-	return $edd_testing_plugin_admin_views_and_settings;
+	return $edd_testing_assistant_admin_views_and_settings;
 
 }
 
-function edd_testing_plugin_get_started_description() {
+function edd_testing_assistant_get_started_description() {
 
-	return __( 'This page generates testing JSON, which powers the EDD Testing Assistant. Use this page if you are "leading the charge" on testing a new set of scenarios. Otherwise, you may wish to obtain the testing JSON file from a colleague, to ensure you are running the same scenarios. If there is any difference in your JSON files, your scenario numbers will not be in alignment.', 'edd-testing-plugin' );
+	return __( 'This page generates testing JSON, which powers the EDD Testing Assistant. Use this page if you are "leading the charge" on testing a new set of scenarios. Otherwise, you may wish to obtain the testing JSON file from a colleague, to ensure you are running the same scenarios. If there is any difference in your JSON files, your scenario numbers will not be in alignment.', 'edd-testing-assistant' );
 }
 
-function edd_testing_plugin_get_svg_icon() {
+function edd_testing_assistant_get_svg_icon() {
 
 	$svg_icon = '<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
 		 width="40px" height="40px" viewBox="0 0 1000 1000" enable-background="new 0 0 1000 1000" xml:space="preserve">

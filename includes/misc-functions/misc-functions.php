@@ -1,17 +1,79 @@
 <?php
 
 /**
- * EDD Testing Plugin - Misc Functions
+ * EDD Testing Assistant - Misc Functions
  *
- * @package     EDD Testing Plugin
- * @subpackage  Classes/EDD Testing Plugin
+ * @package     EDD Testing Assistant
+ * @subpackage  Classes/EDD Testing Assistant
  * @copyright   Copyright (c) 2018, Phil Johnston
  * @license     http://opensource.org/licenses/gpl-2.0.php GNU Public License
  * @since       1.0.0
 */
 
-// This function will return a JSON array which contains all of the possible settings, with some default values inserted to help define tests.
-function edd_testing_plugin_get_possible_options( $strip_api_keys = false ){
+// Upon page load, create a single-priced product and a variably-priced product so we can capture all possible settings.
+// These products are always overwritten, and are only used as templates for the creation of other testing products.
+function edd_testing_assistant_set_default_products() {
+
+	// Check if a non-variably priced product already exists from a previous activation
+	$non_variably_priced_product_template = get_option( 'edd_testing_assistant_non_variably_priced_product_template' );
+	$non_variable_exists = false;
+
+	// Check if it was deleted or not
+	if ( $non_variably_priced_product_template ){
+		$non_variable_exists = get_post( $non_variably_priced_product_template );
+	}
+
+	// If it does not exist, create one
+	if ( ! $non_variable_exists ){
+
+		// Create post object
+		$non_variably_priced_product_template_settings = array(
+		  'post_title'    => __( 'Single Priced Product Template (automatically created for testing)', 'edd-testing-assistant' ),
+		  'post_content'  => __( 'This product was automatically created by the EDD Testing Assistant. It is not recommended that you use this product in any manual tests, nor make any changes, as they will be overwritten when tests are run by the EDD Testing Assistant', 'edd-testing-assistant' ),
+		  'post_status'   => 'publish',
+		  'post_author'   => 1,
+		  'post_type' => 'download'
+		);
+
+		// Insert the post into the database
+		$non_variably_priced_product_template = wp_insert_post( $non_variably_priced_product_template_settings );
+
+		// Store this in the database for future use
+		update_option( 'edd_testing_assistant_non_variably_priced_product_template', $non_variably_priced_product_template );
+	}
+
+	// Check if a variably priced product already exists from a previous activation
+	$variably_priced_product_template = get_option( 'edd_testing_assistant_variably_priced_product_template' );
+	$variable_exists = false;
+
+	// Check if it was deleted or not
+	if ( $variably_priced_product_template ){
+		$variable_exists = get_post( $variably_priced_product_template );
+	}
+
+	// If it does not exist, create one
+	if ( ! $variable_exists ){
+
+		// Create post object
+		$variably_priced_product_template_settings = array(
+		  'post_title'    => __( 'Variably Priced Product Template (automatically created for testing)', 'edd-testing-assistant' ),
+		  'post_content'  => __( 'This product was automatically created by the EDD Testing Assistant. It is not recommended that you use this product in any manual tests, nor make any changes, as they will be overwritten when tests are run by the EDD Testing Assistant', 'edd-testing-assistant' ),
+		  'post_status'   => 'publish',
+		  'post_author'   => 1,
+		  'post_type' => 'download'
+		);
+
+		// Insert the post into the database
+		$variably_priced_product_template = wp_insert_post( $variably_priced_product_template_settings );
+
+		// Store this in the database for future use
+		update_option( 'edd_testing_assistant_variably_priced_product_template', $variably_priced_product_template );
+
+	}
+}
+
+// This function will return an array which contains all of the possible admin settings, with some default values inserted to help define tests.
+function edd_testing_assistant_get_possible_options( $strip_api_keys = false ){
 
 	$possible_values = array();
 
@@ -67,7 +129,7 @@ function edd_testing_plugin_get_possible_options( $strip_api_keys = false ){
 					if ( isset( $setting['id'] ) ) {
 
 						$possible_values[$top_tab_key][$page_settings_key][$setting['id']]['info'] = $setting;
-						$possible_values[$top_tab_key][$page_settings_key][$setting['id']]['testing_values'] = edd_testing_plugin_get_values_for_testing( $setting );
+						$possible_values[$top_tab_key][$page_settings_key][$setting['id']]['testing_values'] = edd_testing_assistant_get_values_for_testing( $setting );
 					}
 
 				} else if ( 'checkbox' == $setting['type'] ) {
@@ -107,7 +169,7 @@ function edd_testing_plugin_get_possible_options( $strip_api_keys = false ){
 					if ( isset( $setting['id'] ) ) {
 
 						$possible_values[$top_tab_key][$page_settings_key][$setting['id']]['info'] = $setting;
-						$possible_values[$top_tab_key][$page_settings_key][$setting['id']]['testing_values'] = edd_testing_plugin_get_values_for_testing( $setting, $strip_api_keys );
+						$possible_values[$top_tab_key][$page_settings_key][$setting['id']]['testing_values'] = edd_testing_assistant_get_values_for_testing( $setting, $strip_api_keys );
 					}
 
 				}
@@ -135,7 +197,7 @@ function edd_testing_plugin_get_possible_options( $strip_api_keys = false ){
 			// Add some helpful data about this second level item
 			$usable_array_of_possible_values[$top_tab_key]['contents'][$second_level_tab_key] = array(
 				'info' => array (
-					'visual_name' => isset( $second_level_admin_setting_tabs[$top_tab_key][$second_level_tab_key] ) ? $second_level_admin_setting_tabs[$top_tab_key][$second_level_tab_key] : __( 'No name found', 'edd-testing-plugin' ),
+					'visual_name' => isset( $second_level_admin_setting_tabs[$top_tab_key][$second_level_tab_key] ) ? $second_level_admin_setting_tabs[$top_tab_key][$second_level_tab_key] : __( 'No name found', 'edd-testing-assistant' ),
 				),
 				'contents' => $possible_values[$top_tab_key][$second_level_tab_key]
 			);
@@ -158,12 +220,14 @@ function edd_testing_plugin_get_possible_options( $strip_api_keys = false ){
 
 	}
 
-	return $usable_array_of_possible_values;
+	$values_for_testing = $usable_array_of_possible_values + edd_testing_assistant_get_possible_product_settings() + edd_testing_assistant_get_possible_cart_settings();
+
+	return $values_for_testing;
 
 }
 
-// This function is used by the edd_testing_plugin_get_possible_options function to get the best default value for a setting
-function edd_testing_plugin_get_values_for_testing( $setting, $strip_api_keys = false ) {
+// This function is used by the edd_testing_assistant_get_possible_options function to get the best default value for a setting
+function edd_testing_assistant_get_values_for_testing( $setting, $strip_api_keys = false ) {
 
 	$values_for_testing = array();
 
@@ -217,4 +281,301 @@ function edd_testing_plugin_get_values_for_testing( $setting, $strip_api_keys = 
 	}
 
 	return $values_for_testing;
+}
+
+// This function return an array which contains all of the possible Product settings
+function edd_testing_assistant_get_possible_product_settings() {
+
+	//Get the templates for products
+	$non_variably_priced_product_template = get_option( 'edd_testing_assistant_non_variably_priced_product_template' );
+	$variably_priced_product_template = get_option( 'edd_testing_assistant_variably_priced_product_template' );
+
+	$product_options = array();
+
+	// Add all core options for products
+	$edd_product_settings = apply_filters( 'edd_testing_assistant_product_settings', edd_download_metabox_fields() );
+
+	// We need to add more data about each field, we'll rebuild that here
+	$rebuilt_product_fields = array(
+		'product_settings' => array(
+			'info' => array(
+				'visual_name' => __( 'Product-Specific Settings', 'edd-testing-assistant' ),
+			),
+			'contents' => array(
+				'core_settings' => array(
+					'info' => array(
+						'visual_name' => __( 'Easy Digital Downloads Core', 'edd-testing-assistant' ),
+					),
+					'contents' => array(
+					)
+				),
+			)
+		)
+	 );
+
+	// Loop through each core product value
+	foreach( $edd_product_settings as $value_slug ) {
+
+		// Set the type of field based on the name of it.
+		switch ( $value_slug ) {
+			case '_edd_product_type':
+
+				// Add the data about this field to the new array
+				$rebuilt_product_fields['product_settings']['contents']['core_settings']['contents'][$value_slug] = array(
+					'info' => array (
+						'visual_name' => __( 'Product Type', 'edd-testing-assistant' ),
+						'context' => 'product_setting'
+					),
+					'testing_values' => array(
+						'default',
+						'bundle'
+					)
+				);
+
+				break;
+
+			case 'edd_price':
+
+				// Add the data about this field to the new array
+				$rebuilt_product_fields['product_settings']['contents']['core_settings']['contents'][$value_slug] = array(
+					'info' => array (
+						'visual_name' => __( 'Price', 'edd-testing-assistant' ),
+						'context' => 'product_setting'
+					),
+					'testing_values' => array(
+						'100'
+					)
+				);
+
+				break;
+
+			case '_variable_pricing':
+
+				// Variable pricing is not yet handled, so breaking here while it gets built out below
+				break;
+
+				// Add the data about this field to the new array
+				$rebuilt_product_fields['product_settings']['contents']['core_settings']['contents'][$value_slug] = array(
+					'info' => array (
+						'visual_name' => __( 'Enable variable pricing', 'edd-testing-assistant' ),
+						'context' => 'product_setting'
+					),
+					'testing_values' => array(
+						'checked',
+						'unchecked'
+					)
+				);
+
+				break;
+
+			case '_edd_price_options_mode':
+
+				// Variable pricing is not yet handled, so breaking here while it gets built out below
+				break;
+
+				// Add the data about this field to the new array
+				$rebuilt_product_fields['product_settings']['contents']['core_settings']['contents'][$value_slug] = array(
+					'info' => array (
+						'visual_name' => __( 'Multi-Option purchase mode', 'edd-testing-assistant' ),
+						'context' => 'product_setting'
+					),
+					'testing_values' => array(
+						'checked',
+						'unchecked'
+					)
+				);
+
+				break;
+
+			case 'edd_variable_prices':
+
+				// Variable pricing is not yet handled, so breaking here while it gets built out below
+				break;
+
+				// Lets pull in all of the values that are saved to the variable prices from our product template
+				edd_get_variable_prices( $variably_priced_product_template );
+
+				// Add testing values for the name of a variably priced product
+				$rebuilt_product_fields['product_settings']['contents']['core_settings']['contents']['name'] = array(
+					'info' => array (
+						'visual_name' => __( 'Variable Price Name', 'edd-testing-assistant' ),
+						'context' => 'product_setting'
+					),
+					'testing_values' => array(
+						'Small',
+						'Medium',
+						'Large'
+					)
+				);
+
+				// Add testing values for the amount of a variably priced product
+				$rebuilt_product_fields['product_settings']['contents']['core_settings']['contents']['amount'] = array(
+					'info' => array (
+						'visual_name' => __( 'Variable Price Amount', 'edd-testing-assistant' ),
+						'context' => 'product_setting'
+					),
+					'testing_values' => array(
+						'Small',
+						'Medium',
+						'Large'
+					)
+				);
+
+				// Add testing values for the license limit (Software Licensing) of a variably priced product
+				$rebuilt_product_fields['product_settings']['contents']['core_settings']['contents']['license_limit'] = array(
+					'info' => array (
+						'visual_name' => __( 'Variable Price Sl License Limit', 'edd-testing-assistant' ),
+						'context' => 'product_setting'
+					),
+					'testing_values' => array(
+						'0',
+						'1',
+						'2'
+					)
+				);
+
+				// Add testing values for the "recurring enabled" (EDD Recurring) of a variably priced product
+				$rebuilt_product_fields['product_settings']['contents']['core_settings']['contents']['recurring'] = array(
+					'info' => array (
+						'visual_name' => __( 'Recurring Enabled', 'edd-testing-assistant' ),
+						'context' => 'product_setting'
+					),
+					'testing_values' => array(
+						'yes',
+						'no',
+					)
+				);
+
+				// Add testing values for the Trial Quantity (EDD Recurring) of a variably priced product
+				$rebuilt_product_fields['product_settings']['contents']['core_settings']['contents']['trial-quantity'] = array(
+					'info' => array (
+						'visual_name' => __( 'Free Trial Quantity (number of days/weeks/months)', 'edd-testing-assistant' ),
+						'context' => 'product_setting'
+					),
+					'testing_values' => array(
+						'0',
+						'1',
+						'2'
+					)
+				);
+
+				// Add testing values for the Trial Unit (EDD Recurring) of a variably priced product
+				$rebuilt_product_fields['product_settings']['contents']['core_settings']['contents']['trial-unit'] = array(
+					'info' => array (
+						'visual_name' => __( 'Free Trial Unit (is the period days, weeks, months, or years)', 'edd-testing-assistant' ),
+						'context' => 'product_setting'
+					),
+					'testing_values' => array(
+						'day',
+						'week',
+						'month',
+						'year'
+					)
+				);
+
+				// Add testing values for the Recurring Period (EDD Recurring) of a variably priced product
+				$rebuilt_product_fields['product_settings']['contents']['core_settings']['contents']['period'] = array(
+					'info' => array (
+						'visual_name' => __( 'Recurring Period', 'edd-testing-assistant' ),
+						'context' => 'product_setting'
+					),
+					'testing_values' => array(
+						'day',
+						'week',
+						'month',
+						'year'
+					)
+				);
+
+				// Add testing values for the Recurring Times (EDD Recurring) of a variably priced product
+				$rebuilt_product_fields['product_settings']['contents']['core_settings']['contents']['times'] = array(
+					'info' => array (
+						'visual_name' => __( 'Recurring Times', 'edd-testing-assistant' ),
+						'context' => 'product_setting'
+					),
+					'testing_values' => array(
+						'0',
+						'1',
+						'2',
+					)
+				);
+
+				// Add testing values for the Recurring Times (EDD Recurring) of a variably priced product
+				$rebuilt_product_fields['product_settings']['contents']['core_settings']['contents']['signup_fee'] = array(
+					'info' => array (
+						'visual_name' => __( 'Recurring Signup Fee', 'edd-testing-assistant' ),
+						'context' => 'product_setting'
+					),
+					'testing_values' => array(
+						'0',
+						'1',
+						'2',
+					)
+				);
+
+				break;
+
+			case 'edd_download_files':
+
+				// Not handled yet
+				break;
+
+			case '_edd_download_tax_exclusive':
+
+				// Add the data about this field to the new array
+				$rebuilt_product_fields['product_settings']['contents']['core_settings']['contents'][$value_slug] = array(
+					'info' => array (
+						'visual_name' => __( 'Ignore Tax', 'edd-testing-assistant' ),
+						'context' => 'product_setting'
+					),
+					'testing_values' => array(
+						'checked',
+						'unchecked'
+					)
+				);
+
+				break;
+
+		}
+
+	}
+
+	return apply_filters( 'edd_testing_assistant_product_fields', $rebuilt_product_fields, $edd_product_settings );
+}
+
+// This function return an array which contains all of the possible Cart settings
+function edd_testing_assistant_get_possible_cart_settings() {
+
+	$cart_options = array();
+
+	// We need to add more data about each field, we'll rebuild that here
+	$rebuilt_cart_fields = array(
+		'cart_settings' => array(
+			'info' => array(
+				'visual_name' => __( 'Cart - State at checkout', 'edd-testing-assistant' ),
+			),
+			'contents' => array(
+				'core_settings' => array(
+					'info' => array(
+						'visual_name' => __( 'Easy Digital Downloads Core', 'edd-testing-assistant' ),
+					),
+					'contents' => array(
+						'discount_code' => array(
+							'info' => array (
+								'visual_name' => __( 'Discount Code - Add "%" if percentage. Use number only for flat amount (1% vs 1)', 'edd-testing-assistant' ),
+								'context' => 'cart_setting'
+							),
+							'testing_values' => array(
+								'none',
+								'1%',
+								'1',
+							)
+						),
+					)
+				),
+			)
+		)
+	 );
+
+	return apply_filters( 'edd_testing_assistant_cart_fields', $rebuilt_cart_fields );
 }
