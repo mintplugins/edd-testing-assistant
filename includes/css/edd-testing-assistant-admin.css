@@ -98,27 +98,31 @@ edd-testing-assistant-admin/* Fix bad css in WP core */
 }
 
 /* JSON Helper View */
-.edd-testing-assistant-helper-json textarea,
-.edd-testing-assistant-helper-json input[type="text"]{
+.edd-testing-assistant-build-scenarios textarea,
+.edd-testing-assistant-build-scenarios input[type="text"]{
 	width:100%;
 }
-.edd-testing-assistant-helper-json .edd-testing-assistant-multiple-checkboxes-level{
+.edd-testing-assistant-build-scenarios .edd-testing-assistant-multiple-checkboxes-level{
 	margin-left:20px;
 }
-.edd-testing-assistant-helper-json .edd-testing-assistant-testing-values,
-.edd-testing-assistant-helper-json .edd-testing-assistant-add-variant-button{
+.edd-testing-assistant-build-scenarios .edd-testing-assistant-testing-values,
+.edd-testing-assistant-build-scenarios .edd-testing-assistant-add-variant-button{
 	margin:5px;
 }
 .edd-testing-assistant-generate-testing-json-area,
-.edd-testing-assistant-scenario-instructions-and-results-area{
-	margin-top:25px;
+.edd-testing-assistant-scenario-instructions-and-results-area,
+.edd-testing-assistant-build-scenarios-container{
+	margin-top:50px;
 }
 .edd-testing-assistant-scenario-instructions{
 	margin-top:15px;
 }
+.edd-testing-assistant-name-of-test-area{
+	margin-bottom:15px;
+}
 
 /* Define Tests View */
-.edd-testing-assistant-helper-json-paste-area textarea{
+.edd-testing-assistant-build-scenarios-paste-area textarea{
 	width:100%;
 	height:1000px;
 }

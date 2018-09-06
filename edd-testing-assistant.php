@@ -119,7 +119,7 @@ final class EDD_Testing_Plugin {
 		/**
 		 * Admin Enqueue Scripts
 		 */
-		require( EDD_TESTING_ASSISTANT_PLUGIN_DIR . 'includes/misc-functions/admin-enqueue-scripts.php' );
+		require( EDD_TESTING_ASSISTANT_PLUGIN_DIR . 'includes/admin/admin-enqueue-scripts.php' );
 
 		/**
 		 * Settings Functions

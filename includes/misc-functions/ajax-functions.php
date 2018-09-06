@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Custom endpoint function which fetches the user roles
+ * Custom endpoint function which sets the scenario
  *
  * @access   public
  * @since    1.0.0
@@ -53,6 +53,9 @@ function edd_testing_assistant_set_scenario(){
 
 	// Empty the cart
 	edd_empty_cart();
+
+	// Check how many products we need to create
+
 
 	// Check if we need to create a product or not
 	foreach( $all_scenarios[$current_scenario]['values'] as $setting_key => $setting_data ) {

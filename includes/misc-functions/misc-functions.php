@@ -220,7 +220,8 @@ function edd_testing_assistant_get_possible_options( $strip_api_keys = false ){
 
 	}
 
-	$values_for_testing = $usable_array_of_possible_values + edd_testing_assistant_get_possible_product_settings() + edd_testing_assistant_get_possible_cart_settings();
+	$values_for_testing = $usable_array_of_possible_values+ edd_testing_assistant_get_possible_cart_settings();
+	// + edd_testing_assistant_get_possible_product_settings();
 
 	return $values_for_testing;
 

@@ -32,9 +32,21 @@ function edd_testing_assistant_admin_enqueue_scripts(){
 	wp_enqueue_script( 'babel', EDD_TESTING_ASSISTANT_PLUGIN_URL . 'includes/js/libraries/babel/browser.js', $dependencies, null );
 	$dependencies[] = 'babel';
 
-	wp_enqueue_script( 'edd_testing_assistant_admin_js', EDD_TESTING_ASSISTANT_PLUGIN_URL . 'includes/js/admin/edd-testing-assistant-admin-react.js', $dependencies, EDD_TESTING_ASSISTANT_VERSION, true );
+	wp_enqueue_script( 'edd_testing_assistant_misc_functions_js', EDD_TESTING_ASSISTANT_PLUGIN_URL . 'includes/js/admin/misc-functions.js', $dependencies, EDD_TESTING_ASSISTANT_VERSION, true );
+	$dependencies[] = 'edd_testing_assistant_misc_functions_js';
 
-	wp_localize_script( 'edd_testing_assistant_admin_js', 'edd_testing_assistant_admin_js_vars',
+	wp_enqueue_script( 'edd_testing_assistant_build_scenarios_js', EDD_TESTING_ASSISTANT_PLUGIN_URL . 'includes/js/admin/view-build-scenarios.js', $dependencies, EDD_TESTING_ASSISTANT_VERSION, true );
+	$dependencies[] = 'edd_testing_assistant_build_scenarios_js';
+
+	wp_enqueue_script( 'edd_testing_assistant_get_scenarios_js', EDD_TESTING_ASSISTANT_PLUGIN_URL . 'includes/js/admin/view-get-scenarios.js', $dependencies, EDD_TESTING_ASSISTANT_VERSION, true );
+	$dependencies[] = 'edd_testing_assistant_get_scenarios_js';
+
+	wp_enqueue_script( 'edd_testing_assistant_run_scenarios_js', EDD_TESTING_ASSISTANT_PLUGIN_URL . 'includes/js/admin/view-run-scenarios.js', $dependencies, EDD_TESTING_ASSISTANT_VERSION, true );
+	$dependencies[] = 'edd_testing_assistant_run_scenarios_js';
+
+	wp_enqueue_script( 'edd_testing_assistant_main_js', EDD_TESTING_ASSISTANT_PLUGIN_URL . 'includes/js/admin/edd-testing-assistant-main.js', $dependencies, EDD_TESTING_ASSISTANT_VERSION, true );
+
+	wp_localize_script( 'edd_testing_assistant_main_js', 'edd_testing_assistant_main_js_vars',
 		array(
 			'ajaxurl' => get_bloginfo( 'url' ),
 			'ajax_nonce_value' => wp_create_nonce( 'edd_testing_assistant_update_scenario_nonce' ),
@@ -50,6 +62,11 @@ add_action( 'admin_enqueue_scripts', 'edd_testing_assistant_admin_enqueue_script
 function edd_testing_assistant_admin_modify_jsx_tag( $tag, $handle, $src ) {
 	// Check that this is output of JSX file
 	if (
+		'edd_testing_assistant_misc_functions_js' == $handle ||
+		'edd_testing_assistant_build_scenarios_js' == $handle ||
+		'edd_testing_assistant_get_scenarios_js' == $handle ||
+		'edd_testing_assistant_run_scenarios_js' == $handle ||
+		'edd_testing_assistant_main_js' == $handle ||
 		'edd_testing_assistant_admin_js' == $handle
 	) {
 		$tag = str_replace( "<script type='text/javascript'", "<script type='text/babel'", $tag );

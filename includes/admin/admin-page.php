@@ -21,7 +21,7 @@ function edd_testing_assistant_admin_page_output() {
 
 	// Create the default products if they don't already exist
 	edd_testing_assistant_set_default_products();
-	
+
 	$svg_icon = edd_testing_assistant_get_svg_icon();
 
 	// This is all we output from PHP. The rest is handled through React JS.
@@ -48,27 +48,38 @@ function edd_testing_assistant_get_views_and_settings(){
 
 	// Set up the views here
 	$edd_testing_assistant_admin_views_and_settings = array(
-		'get_started' => array(
-			'visual_name' => 'Get started',
+		'build_scenarios_view' => array(
+			'visual_name' => '1. Build Scenarios',
 			'description' => edd_testing_assistant_get_started_description(),
-			'react_component' => 'helper_json_view',
+			'react_component' => 'build_scenarios_view',
 			'scenario_generation_options' => array(
+				'name_of_test' => array(
+					'visual_title' => __( '1. Enter the name and version set of tests', 'edd-testing-assistant' ),
+					'react_component' => 'name_of_test',
+					'description' => __( 'If you are testing what happens after a user checkout, enter the number of products you wish to have in the cart during each scenario. This will affect the available options below.', 'edd-testing-assistant' ),
+				),
+				'number_of_products' => array(
+					'visual_title' => __( '2. Choose the number of products you need in the cart', 'edd-testing-assistant' ),
+					'react_component' => 'number_of_products',
+					'description' => __( 'If you are testing what happens after a user checkout, enter the number of products you wish to have in the cart during each scenario. This will affect the available options below.', 'edd-testing-assistant' ),
+				),
 				'add_custom_scenarios' => array(
-					'visual_title' => __( 'Pick your scenarios', 'edd-testing-assistant' ),
+					'visual_title' => __( '3. Pick your scenarios', 'edd-testing-assistant' ),
 					'react_component' => 'multiple_checkboxes',
 					'options' => edd_testing_assistant_get_possible_options( true ),
 					'description' => __( 'Include the relevant settings for which you would like to add scenarios. If you leave a setting unchecked, the saved-to-your-system value will be used, and a unique scenario relating to that setting will not be created.', 'edd-testing-assistant' ),
+					'base_product_settings' => edd_testing_assistant_get_possible_product_settings()
 				),
 			),
 		),
-		'define_scenarios' => array(
-			'visual_name' => '1. Define scenarios',
-			'react_component' => 'define_scenarios',
+		'get_scenarios_view' => array(
+			'visual_name' => '2. Get Scenarios',
+			'react_component' => 'get_scenarios_view',
 			'description' => __( 'Paste testing JSON into the box below to define the testing scenarios', 'edd-testing-assistant' ),
 		),
-		'run_scenarios' => array(
-			'visual_name' => '2. Run scenarios',
-			'react_component' => 'run_scenarios',
+		'run_scenarios_view' => array(
+			'visual_name' => '3. Run scenarios',
+			'react_component' => 'run_scenarios_view',
 			'description' => __( 'Based on the testing JSON, here are the scenarios that need to be tested.', 'edd-testing-assistant' ),
 		),
 	);
