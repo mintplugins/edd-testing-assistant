@@ -189,7 +189,7 @@ window.edd_testing_assistant_get_product_settings = function edd_testing_assista
 
             for( var setting_key in base_product_settings[parent_level_key]['contents'][setting_section_key]['contents'] ) {
 
-                product_settings[parent_level_key]['contents'][setting_section_key]['contents'][setting_key + number_to_add] = base_product_settings[parent_level_key]['contents'][setting_section_key]['contents'][setting_key];
+                product_settings[parent_level_key]['contents'][setting_section_key]['contents'][setting_key + ' - Product ' + number_to_add] = base_product_settings[parent_level_key]['contents'][setting_section_key]['contents'][setting_key];
 
                 delete product_settings[parent_level_key]['contents'][setting_section_key]['contents'][setting_key];
 

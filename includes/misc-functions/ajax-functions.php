@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Custom endpoint function which sets the scenario
+ * Custom endpoint function which fetches the user roles
  *
  * @access   public
  * @since    1.0.0
@@ -49,37 +49,40 @@ function edd_testing_assistant_set_scenario(){
 	// If we made it this far, we have a valid request to set the scenario. Setting the scenario involves setting the admin settings, and possibly creating a new product with a set of settings as well.
 	$current_scenario = $decoded['current_scenario'];
 	$all_scenarios = $decoded['all_scenarios'];
-	$need_to_create_product = false;
 
 	// Empty the cart
 	edd_empty_cart();
 
 	// Check how many products we need to create
-
+	$products_to_create = array();
+	$products_created = array();
 
 	// Check if we need to create a product or not
 	foreach( $all_scenarios[$current_scenario]['values'] as $setting_key => $setting_data ) {
 
 		if ( 'product_setting' == $setting_data['context'] ) {
-			$need_to_create_product = true;
-			break;
+
+			$data = explode( ' - Product ', sanitize_text_field( $setting_key ) );
+			$products_to_create[$data[1]] = null;
+
 		}
 	}
 
 	// If we do need to create a product, make one now
-	if ( $need_to_create_product ) {
+	if ( $products_to_create ) {
 
-		// Create the new post
-		$post_id = wp_insert_post(
-			array(
-				'post_title'  => sprintf( __( 'EDD Testing Scenario %s Created automatically', 'edd-testing-assistant' ), $current_scenario ),
-				'post_status' => 'publish',
-				'post_type'   => 'download'
-			)
-		);
+		foreach( $products_to_create as $product_number => $value_unneeded ) {
 
-		// Add the item we just created to the cart
-		edd_add_to_cart( $post_id );
+			// Create the new post
+			$products_created[$product_number] = wp_insert_post(
+				array(
+					'post_title'  => sprintf( __( 'EDD Testing Scenario %s - Product %s', 'edd-testing-assistant' ), $current_scenario, $product_number ),
+					'post_status' => 'publish',
+					'post_type'   => 'download'
+				)
+			);
+
+		}
 
 	}
 
@@ -104,8 +107,11 @@ function edd_testing_assistant_set_scenario(){
 
 		} else if ( 'product_setting' == $setting_data['context'] ) {
 
+			$data = explode( ' - Product ', sanitize_text_field( $setting_key ) );
+			$post_id = $products_created[$data[1]];
+
 			// Assign this as post meta to the product we created.
-			update_post_meta( $post_id, $setting_key, $setting_data['value'] );
+			update_post_meta( $post_id, $data[0], $setting_data['value'] );
 
 		} else if ( 'cart_setting' == $setting_data['context'] ) {
 
@@ -167,10 +173,15 @@ function edd_testing_assistant_set_scenario(){
 		}
 	}
 
+	// Add all the items we just created to the cart
+	foreach( $products_created as $order_id => $post_id ) {
+		edd_add_to_cart( $post_id );
+	}
+
 	echo json_encode( array(
 		'success' => true,
 		'details' => 'All settings updated',
-		'product_created' => $need_to_create_product,
+		'products_created' => $products_created,
 		'data' => $setting_data,
 		'current_scenario' => $current_scenario
 	) );

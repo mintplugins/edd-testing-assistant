@@ -78,7 +78,7 @@ window.EDD_Testing_Assistant_Get_Scenarios_View = class EDD_Testing_Assistant_Ge
                 <div className={ 'edd-testing-assistant-admin-view-description' }>
                     { this.props.view_info.description }
                 </div>
-                <div className={ 'edd-testing-assistant-helper-json-paste-area' + this.helper_json_valid_class_name( this.state.helper_json_valid ) }>
+                <div className={ 'edd-testing-assistant-build-scenarios-paste-area' + this.helper_json_valid_class_name( this.state.helper_json_valid ) }>
                     <textarea value={ this.state.helper_json } onChange={ this.handle_helper_json_change.bind( null ) }></textarea>
                 </div>
             </div>
