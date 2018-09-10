@@ -176,20 +176,21 @@ window.edd_testing_assistant_string_to_component = function edd_testing_assistan
     }
 }
 
-// This function will append a number to each setting slug
+// This function will add a new product to the list of available options, with all variants
 window.edd_testing_assistant_get_product_settings = function edd_testing_assistant_get_product_settings( number_to_add, base_product_settings ) {
 
     var product_settings = JSON.parse( JSON.stringify( base_product_settings ) );
 
-    //console.log( base_product_settings );
-
+    // Adjust the keys of each variant to be prefixed with the product and the number
     for( var parent_level_key in base_product_settings ) {
 
         for( var setting_section_key in base_product_settings[parent_level_key]['contents'] ) {
 
             for( var setting_key in base_product_settings[parent_level_key]['contents'][setting_section_key]['contents'] ) {
 
-                product_settings[parent_level_key]['contents'][setting_section_key]['contents'][setting_key + ' - Product ' + number_to_add] = base_product_settings[parent_level_key]['contents'][setting_section_key]['contents'][setting_key];
+                var variants_of_setting = base_product_settings[parent_level_key]['contents'][setting_section_key]['contents'][setting_key];
+
+                product_settings[parent_level_key]['contents'][setting_section_key]['contents'][setting_key + ' - Product ' + number_to_add] = variants_of_setting;
 
                 delete product_settings[parent_level_key]['contents'][setting_section_key]['contents'][setting_key];
 
@@ -197,8 +198,6 @@ window.edd_testing_assistant_get_product_settings = function edd_testing_assista
 
         }
     }
-
-    //console.log( base_product_settings );
 
     return product_settings[parent_level_key];
 
