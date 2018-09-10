@@ -22,7 +22,7 @@ window.EDD_Testing_Assistant_Build_Scenarios_View = class EDD_Testing_Assistant_
             all_scenarios: {},
             name_of_file: '',
             version_of_file: '',
-            number_of_products_in_cart: 1
+            number_of_products_in_cart: 0
         }
 
     }
@@ -151,7 +151,7 @@ window.EDD_Testing_Assistant_Multiple_Checkboxes = class EDD_Testing_Assistant_M
 
         this.state = {
             options: this.props.option_info.options,
-            number_of_products_in_cart: 1,
+            number_of_products_in_cart: 0,
         };
 
         this.variant_input_delay = null;
@@ -968,7 +968,7 @@ window.EDD_Testing_Assistant_Number_Of_Products = class EDD_Testing_Assistant_Nu
         super( props );
 
         this.state = {
-            number_of_products_in_cart: 1
+            number_of_products_in_cart: 0
         }
 
     }
