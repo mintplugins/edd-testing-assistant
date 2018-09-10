@@ -245,7 +245,7 @@ window.EDD_Testing_Assistant_Multiple_Checkboxes = class EDD_Testing_Assistant_M
 
     }
 
-    add_remove_products_to_available_options() {
+    add_remove_products_from_available_options() {
 
         // If there's been no change in the number of products
         if ( this.state.number_of_products_in_cart == this.props.number_of_products_in_cart ) {
@@ -261,8 +261,13 @@ window.EDD_Testing_Assistant_Multiple_Checkboxes = class EDD_Testing_Assistant_M
             // Loop the number of products in the cart we want to have options for
             for ( var i = 1; i <= this.props.number_of_products_in_cart; i++ ) {
 
-                // Add available options to the array for each product
-                state_options_holder['product_settings' + i ] = edd_testing_assistant_get_product_settings( i, temp_product_settings );
+                // If this product does not yet exist on the screen
+                if ( i > this.state.number_of_products_in_cart ) {
+
+                    // Add available options to the array for each product
+                    state_options_holder['product_settings' + i ] = edd_testing_assistant_get_product_settings( i, temp_product_settings );
+
+                }
 
             }
 
@@ -287,7 +292,7 @@ window.EDD_Testing_Assistant_Multiple_Checkboxes = class EDD_Testing_Assistant_M
 
         if ( this.props.scenarios_are_fresh ) {
 
-            var nested_checkboxes = this.add_remove_products_to_available_options();
+            var nested_checkboxes = this.add_remove_products_from_available_options();
             var state_holder = this.state;
 
             state_holder = this.set_default_state_of_children_checkboxes( nested_checkboxes, null, state_holder );
@@ -379,8 +384,6 @@ window.EDD_Testing_Assistant_Multiple_Checkboxes = class EDD_Testing_Assistant_M
 
         // (Re)-Set up the save to fire in 2500ms
         this.options_to_test_input_delay = setTimeout( function() {
-
-            console.log( 'generate_array_of_options_to_test' );
 
             clearTimeout( this_component.options_to_test_input_delay );
 
@@ -901,8 +904,6 @@ window.EDD_Testing_Assistant_Name_Of_Test = class EDD_Testing_Assistant_Name_Of_
 
             clearTimeout( this_component.name_input_delay );
 
-            console.log( 'sgsdgsdg' );
-
             this_component.props.update_parent_state( 'name_of_file', new_value );
 
         }, 1000);
@@ -928,8 +929,6 @@ window.EDD_Testing_Assistant_Name_Of_Test = class EDD_Testing_Assistant_Name_Of_
         this_component.version_input_delay = setTimeout( function() {
 
             clearTimeout( this_component.version_input_delay );
-
-            console.log( 'sgsdgsdg' );
 
             this_component.props.update_parent_state( 'version_of_file', new_value );
 
