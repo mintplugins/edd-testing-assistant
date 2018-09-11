@@ -19,9 +19,6 @@ add_action('admin_menu', 'edd_testing_assistant_settings_menu_button');
  */
 function edd_testing_assistant_admin_page_output() {
 
-	// Create the default products if they don't already exist
-	edd_testing_assistant_set_default_products();
-
 	$svg_icon = edd_testing_assistant_get_svg_icon();
 
 	// This is all we output from PHP. The rest is handled through React JS.
