@@ -10,68 +10,6 @@
  * @since       1.0.0
 */
 
-// Upon page load, create a single-priced product and a variably-priced product so we can capture all possible settings.
-// These products are always overwritten, and are only used as templates for the creation of other testing products.
-function edd_testing_assistant_set_default_products() {
-
-	// Check if a non-variably priced product already exists from a previous activation
-	$non_variably_priced_product_template = get_option( 'edd_testing_assistant_non_variably_priced_product_template' );
-	$non_variable_exists = false;
-
-	// Check if it was deleted or not
-	if ( $non_variably_priced_product_template ){
-		$non_variable_exists = get_post( $non_variably_priced_product_template );
-	}
-
-	// If it does not exist, create one
-	if ( ! $non_variable_exists ){
-
-		// Create post object
-		$non_variably_priced_product_template_settings = array(
-		  'post_title'    => __( 'Single Priced Product Template (automatically created for testing)', 'edd-testing-assistant' ),
-		  'post_content'  => __( 'This product was automatically created by the EDD Testing Assistant. It is not recommended that you use this product in any manual tests, nor make any changes, as they will be overwritten when tests are run by the EDD Testing Assistant', 'edd-testing-assistant' ),
-		  'post_status'   => 'publish',
-		  'post_author'   => 1,
-		  'post_type' => 'download'
-		);
-
-		// Insert the post into the database
-		$non_variably_priced_product_template = wp_insert_post( $non_variably_priced_product_template_settings );
-
-		// Store this in the database for future use
-		update_option( 'edd_testing_assistant_non_variably_priced_product_template', $non_variably_priced_product_template );
-	}
-
-	// Check if a variably priced product already exists from a previous activation
-	$variably_priced_product_template = get_option( 'edd_testing_assistant_variably_priced_product_template' );
-	$variable_exists = false;
-
-	// Check if it was deleted or not
-	if ( $variably_priced_product_template ){
-		$variable_exists = get_post( $variably_priced_product_template );
-	}
-
-	// If it does not exist, create one
-	if ( ! $variable_exists ){
-
-		// Create post object
-		$variably_priced_product_template_settings = array(
-		  'post_title'    => __( 'Variably Priced Product Template (automatically created for testing)', 'edd-testing-assistant' ),
-		  'post_content'  => __( 'This product was automatically created by the EDD Testing Assistant. It is not recommended that you use this product in any manual tests, nor make any changes, as they will be overwritten when tests are run by the EDD Testing Assistant', 'edd-testing-assistant' ),
-		  'post_status'   => 'publish',
-		  'post_author'   => 1,
-		  'post_type' => 'download'
-		);
-
-		// Insert the post into the database
-		$variably_priced_product_template = wp_insert_post( $variably_priced_product_template_settings );
-
-		// Store this in the database for future use
-		update_option( 'edd_testing_assistant_variably_priced_product_template', $variably_priced_product_template );
-
-	}
-}
-
 // This function will return an array which contains all of the possible admin settings, with some default values inserted to help define tests.
 function edd_testing_assistant_get_possible_options( $strip_api_keys = false ){
 
@@ -158,7 +96,8 @@ function edd_testing_assistant_get_possible_options( $strip_api_keys = false ){
 					// Loop through each possible gateway and add a checkbox enabled/disabled scenario for each
 					foreach( $setting['options'] as $possibly_enabled_gateway_key => $possibly_enabled_gateway ) {
 						$possible_values[$top_tab_key][$page_settings_key][$possibly_enabled_gateway_key]['info'] = array(
-							'name' => $possibly_enabled_gateway['admin_label']
+							'name' => $possibly_enabled_gateway['admin_label'],
+							'context' => 'payment_gateway'
 						);
 						$possible_values[$top_tab_key][$page_settings_key][$possibly_enabled_gateway_key]['testing_values'] = array( 'checked', 'unchecked' );
 					}
@@ -177,7 +116,7 @@ function edd_testing_assistant_get_possible_options( $strip_api_keys = false ){
 		}
 	}
 
-	// Re-assemble the array so it is useful and contains everything in 1 array, instead of being spread of 5 different, painfully unlinked arrays
+	// Re-assemble the array so it is useful and contains everything in 1 array, instead of being spread over 5 different, unlinked arrays
 	$usable_array_of_possible_values = array();
 
 	// Loop through each top level tab
@@ -209,7 +148,7 @@ function edd_testing_assistant_get_possible_options( $strip_api_keys = false ){
 				$usable_array_of_possible_values[$top_tab_key]['contents'][$second_level_tab_key]['contents'][$third_level_tab_key] = array(
 					'info' => array (
 						'visual_name' => strip_tags( $third_level_tab['info']['name'] ),
-						'context' => 'admin_setting'
+						'context' => isset( $third_level_tab['info']['context'] ) ? strip_tags( $third_level_tab['info']['context'] ) : 'admin_setting'
 					),
 					'testing_values' => $third_level_tab['testing_values']
 				);
@@ -572,6 +511,69 @@ function edd_testing_assistant_get_possible_cart_settings() {
 								'1',
 							)
 						),
+						/*
+						'billing_address_line_1' => array(
+							'info' => array (
+								'visual_name' => __( 'Billing Address Line 1', 'edd-testing-assistant' ),
+								'context' => 'cart_setting'
+							),
+							'testing_values' => array(
+								'123 Fake Street',
+							)
+						),
+						'billing_address_line_2' => array(
+							'info' => array (
+								'visual_name' => __( 'Billing Address Line 2', 'edd-testing-assistant' ),
+								'context' => 'cart_setting'
+							),
+							'testing_values' => array(
+								'Apartment 123',
+							)
+						),
+						'billing_city' => array(
+							'info' => array (
+								'visual_name' => __( 'Billing City', 'edd-testing-assistant' ),
+								'context' => 'cart_setting'
+							),
+							'testing_values' => array(
+								'Toronto',
+							)
+						),
+						'billing_zip' => array(
+							'info' => array (
+								'visual_name' => __( 'Billing Zip/Postal Code', 'edd-testing-assistant' ),
+								'context' => 'cart_setting'
+							),
+							'testing_values' => array(
+								'12345',
+								'13371',
+								'n4k5n3',
+							)
+						),
+						'billing_country' => array(
+							'info' => array (
+								'visual_name' => __( 'Billing Zip/Postal Code', 'edd-testing-assistant' ),
+								'context' => 'cart_setting'
+							),
+							'testing_values' => array(
+								'CA',
+								'US',
+								'MN',
+							)
+						),
+						'billing_state' => array(
+							'info' => array (
+								'visual_name' => __( 'Billing State', 'edd-testing-assistant' ),
+								'context' => 'cart_setting'
+							),
+							'testing_values' => array(
+								'',
+								'Ontario',
+								'Alaska',
+								'Test',
+							)
+						),
+						*/
 					)
 				),
 			)
