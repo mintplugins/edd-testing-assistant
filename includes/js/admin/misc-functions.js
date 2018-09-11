@@ -139,8 +139,6 @@ window.update_total_scenarios = function update_total_scenarios( options_to_test
 
 window.edd_testing_assistant_copy_text_to_clipboard = function edd_testing_assistant_copy_text_to_clipboard( text, event ) {
 
-    event.preventDefault();
-
     var dummy = document.createElement("textarea");
     document.body.appendChild(dummy);
     dummy.value = text;
