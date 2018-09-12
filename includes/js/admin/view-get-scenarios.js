@@ -48,7 +48,7 @@ window.EDD_Testing_Assistant_Get_Scenarios_View = class EDD_Testing_Assistant_Ge
             this.props.update_parent_state( 'all_scenarios', helper_object['all_scenarios'] );
 
             // Set the view to be the "Run Scenarios" step
-            //this.props.update_parent_state( 'current_view', 'run_scenarios' );
+            this.props.update_parent_state( 'current_view', 'run_scenarios_view' );
 
         }
 

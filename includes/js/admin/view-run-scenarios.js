@@ -12,8 +12,6 @@ window.EDD_Testing_Assistant_Run_Scenarios_View = class EDD_Testing_Assistant_Ru
             browser_tab_1_url: '',
             browser_tab_2_url: '',
             browser_tab_3_url: '',
-            browser_tab_4_url: '',
-            browser_tab_5_url: '',
         };
 
         this.set_current_scenario = this.set_current_scenario.bind( this );
@@ -76,7 +74,9 @@ window.EDD_Testing_Assistant_Run_Scenarios_View = class EDD_Testing_Assistant_Ru
                                     browser_tab_1_url: '',
                                 }, function() {
                                     this.setState( {
-                                        browser_tab_1_url: this.props.ajaxurl + '/checkout/'
+                                        browser_tab_1_url: this.props.ajaxurl + '/checkout/',
+                                        browser_tab_2_url: this.props.ajaxurl + '/wp-admin/',
+                                        browser_tab_3_url: this.props.ajaxurl + '/wp-admin/'
                                     } );
                                 } );
 

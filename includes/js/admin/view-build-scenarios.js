@@ -106,8 +106,6 @@ window.EDD_Testing_Assistant_Build_Scenarios_View = class EDD_Testing_Assistant_
 
     handle_copy_button_click( json_stringified, event ){
 
-        console.log( json_stringified );
-
         this.props.update_parent_state( 'current_view', 'get_scenarios_view' );
 
         edd_testing_assistant_copy_text_to_clipboard( json_stringified );
