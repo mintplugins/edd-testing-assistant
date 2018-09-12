@@ -5,15 +5,15 @@ window.EDD_Testing_Assistant_Run_Scenarios_View = class EDD_Testing_Assistant_Ru
         super(props);
 
         this.state = {
-            current_scenario: 1,
+            current_scenario: null,
             current_browser_tab: 1,
             has_been_in_view: false,
             scenario_data_set: false,
-            browser_tab_1_url: this.props.ajaxurl + '/checkout/',
-            browser_tab_2_url: this.props.ajaxurl + '/wp-admin/',
-            browser_tab_3_url: this.props.ajaxurl + '/wp-admin/',
-            browser_tab_4_url: this.props.ajaxurl + '/wp-admin/',
-            browser_tab_5_url: this.props.ajaxurl + '/wp-admin/',
+            browser_tab_1_url: '',
+            browser_tab_2_url: '',
+            browser_tab_3_url: '',
+            browser_tab_4_url: '',
+            browser_tab_5_url: '',
         };
 
         this.set_current_scenario = this.set_current_scenario.bind( this );
@@ -21,6 +21,13 @@ window.EDD_Testing_Assistant_Run_Scenarios_View = class EDD_Testing_Assistant_Ru
         this.render_browser = this.render_browser.bind( this );
         this.set_scenario_on_server = this.set_scenario_on_server.bind( this );
 
+    }
+
+    componentDidUpdate() {
+
+        if ( ! this.state.current_scenario && this.props.all_scenarios[1] ) {
+            this.set_current_scenario( 1 );
+        }
     }
 
     set_scenario_on_server() {
