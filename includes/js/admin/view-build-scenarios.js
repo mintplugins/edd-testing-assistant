@@ -107,7 +107,7 @@ window.EDD_Testing_Assistant_Build_Scenarios_View = class EDD_Testing_Assistant_
     handle_copy_button_click( json_stringified, event ){
 
         console.log( json_stringified );
-        
+
         this.props.update_parent_state( 'current_view', 'get_scenarios_view' );
 
         edd_testing_assistant_copy_text_to_clipboard( json_stringified );
@@ -406,7 +406,7 @@ window.EDD_Testing_Assistant_Multiple_Checkboxes = class EDD_Testing_Assistant_M
             // Set the parent state
             this_component.props.update_parent_state( 'options_to_test', options_to_test );
 
-        }, 1000);
+        }, 500);
 
     }
 
@@ -916,7 +916,7 @@ window.EDD_Testing_Assistant_Name_Of_Test = class EDD_Testing_Assistant_Name_Of_
 
             this_component.props.update_parent_state( 'name_of_file', new_value );
 
-        }, 1000);
+        }, 500);
 
     }
 
@@ -942,7 +942,7 @@ window.EDD_Testing_Assistant_Name_Of_Test = class EDD_Testing_Assistant_Name_Of_
 
             this_component.props.update_parent_state( 'version_of_file', new_value );
 
-        }, 1000);
+        }, 500);
 
     }
 

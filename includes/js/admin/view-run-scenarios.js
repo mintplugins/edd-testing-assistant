@@ -5,7 +5,6 @@ window.EDD_Testing_Assistant_Run_Scenarios_View = class EDD_Testing_Assistant_Ru
         super(props);
 
         this.state = {
-            previous_scenario: 1,
             current_scenario: 1,
             current_browser_tab: 1,
             has_been_in_view: false,
@@ -22,21 +21,6 @@ window.EDD_Testing_Assistant_Run_Scenarios_View = class EDD_Testing_Assistant_Ru
         this.render_browser = this.render_browser.bind( this );
         this.set_scenario_on_server = this.set_scenario_on_server.bind( this );
 
-    }
-
-    componentDidUpdate() {
-
-        // Refresh the checkout tab
-        if ( this.state.previous_scenario != this.state.current_scenario ) {
-            this.setState( {
-                browser_tab_1_url: this.props.ajaxurl,
-                previous_scenario: this.state.current_scenario
-            }, function() {
-                this.setState( {
-                    browser_tab_1_url: this.props.ajaxurl + '/checkout/'
-                } );
-            } );
-        }
     }
 
     set_scenario_on_server() {
@@ -78,6 +62,17 @@ window.EDD_Testing_Assistant_Run_Scenarios_View = class EDD_Testing_Assistant_Ru
 
                             this_component.setState( {
                                 scenario_data_set: true
+                            }, function() {
+
+                                // Refresh the checkout tab
+                                this.setState( {
+                                    browser_tab_1_url: '',
+                                }, function() {
+                                    this.setState( {
+                                        browser_tab_1_url: this.props.ajaxurl + '/checkout/'
+                                    } );
+                                } );
+
                             } );
 
                         } else {
@@ -101,7 +96,6 @@ window.EDD_Testing_Assistant_Run_Scenarios_View = class EDD_Testing_Assistant_Ru
     set_current_scenario( key ) {
 
         this.setState( {
-            previous_scenario: this.state.current_scenario,
             current_scenario: key
         }, function() {
 

@@ -9,6 +9,30 @@
  */
 function edd_testing_assistant_set_scenario(){
 
+	//print_r( edd_get_option( 'gateways' ) );
+	//die();
+
+	/*
+	$address = array(
+		'line1'   => '123',
+		'line2'   => '',
+		'city'    => '',
+		'zip'     => '',
+		'state'   => '',
+		'country' => ''
+	);
+
+	$customer = array(
+		'address' => $address
+	);
+
+	EDD()->session->set( 'customer', $customer );
+	$purchase_data = EDD()->session->get( 'customer' );
+
+	update_user_meta( get_current_user_id(), '_edd_user_address', $address );
+
+	*/
+
 	if ( ! isset( $_GET['edd-testing-assistant-set-scenario'] ) ) {
 		return false;
 	}
@@ -53,6 +77,9 @@ function edd_testing_assistant_set_scenario(){
 	// Empty the cart
 	edd_empty_cart();
 
+	// Set the active payment gateways
+	$payment_gateways = array();
+
 	// Check how many products we need to create
 	$products_to_create = array();
 	$products_created = array();
@@ -91,8 +118,20 @@ function edd_testing_assistant_set_scenario(){
 
 		$value_to_save = null;
 
+		// If this is a payment gateway
+		if ( 'payment_gateway' == $setting_data['context'] ) {
+
+			// Check what the value is, as checkboxes have specific values
+			if ( 'checked' == $setting_data['value'] ) {
+
+				// Add the gateway we want to use, otherwise, leave it blank
+				$payment_gateways[$setting_key] = 1;
+
+			}
+
+		}
 		// If this is an admin setting
-		if ( 'admin_setting' == $setting_data['context'] ) {
+		else if ( 'admin_setting' == $setting_data['context'] ) {
 
 			// Check what the value is, as checkboxes have specific values
 			if ( 'unchecked' == $setting_data['value'] ) {
@@ -114,6 +153,11 @@ function edd_testing_assistant_set_scenario(){
 			update_post_meta( $post_id, $data[0], $setting_data['value'] );
 
 		} else if ( 'cart_setting' == $setting_data['context'] ) {
+
+			// If the setting is the address
+			if ( 'billing_address_line_1' == $setting_key ) {
+				$customer = EDD()->session->get( 'customer' );
+			}
 
 			// If this setting is a discount code in the cart
 			if ( 'discount_code' == $setting_key ) {
@@ -173,6 +217,9 @@ function edd_testing_assistant_set_scenario(){
 		}
 	}
 
+	// Save the array of gateways
+	edd_update_option( 'gateways', $payment_gateways );
+
 	// Add all the items we just created to the cart
 	foreach( $products_created as $order_id => $post_id ) {
 		edd_add_to_cart( $post_id );
@@ -182,7 +229,7 @@ function edd_testing_assistant_set_scenario(){
 		'success' => true,
 		'details' => 'All settings updated',
 		'products_created' => $products_created,
-		'data' => $setting_data,
+		'data' => $payment_gateways,
 		'current_scenario' => $current_scenario
 	) );
 
