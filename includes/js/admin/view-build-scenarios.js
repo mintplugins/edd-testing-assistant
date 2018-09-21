@@ -146,7 +146,7 @@ window.EDD_Testing_Assistant_Build_Scenarios_View = class EDD_Testing_Assistant_
 
                         <button className="edd-testing-assistant-copy-json-button button" onClick={ this.handle_copy_button_click.bind( this, json_stringified ) }>{ 'Copy helper JSON to clipboard and proceed to next step' }</button>
 
-                        <button className="button" href={ 'data:text/json;charset=utf-8,' + encodeURIComponent( json_stringified ) } download={ 'ETA -' + this.state.name_of_file + ' - v' + this.state.version_of_file + '.json' }>{ 'Download helper JSON file' }</button>
+                        <a className="button" href={ 'data:text/json;charset=utf-8,' + encodeURIComponent( json_stringified ) } download={ 'ETA -' + this.state.name_of_file + ' - v' + this.state.version_of_file + '.json' }>{ 'Download helper JSON file' }</a>
                     </div>
 
                 </div>
@@ -163,7 +163,6 @@ window.EDD_Testing_Assistant_Multiple_Checkboxes = class EDD_Testing_Assistant_M
 
         this.state = {
             options: this.props.option_info.options,
-            number_of_products_in_cart: 0,
         };
 
         this.variant_input_delay = null;
