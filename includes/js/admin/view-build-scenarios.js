@@ -17,14 +17,35 @@ window.EDD_Testing_Assistant_Build_Scenarios_View = class EDD_Testing_Assistant_
 
         this.state = {
             component_has_mounted: false,
+            number_of_products_in_cart: 0,
             options_to_test: {},
             total_scenarios: 1,
             all_scenarios: {},
             name_of_file: '',
             version_of_file: '',
-            number_of_products_in_cart: 0
         }
 
+    }
+
+    componentDidUpdate() {
+
+        if ( this.props.number_of_products_in_cart != this.state.number_of_products_in_cart ) {
+            this.setState( {
+                number_of_products_in_cart: this.props.number_of_products_in_cart
+            } );
+        }
+
+        if ( this.props.all_scenarios != this.state.all_scenarios ) {
+            this.setState( {
+                all_scenarios: this.props.all_scenarios
+            } );
+        }
+
+        if ( this.props.options_to_test != this.state.options_to_test ) {
+            this.setState( {
+                options_to_test: this.props.options_to_test
+            } );
+        }
     }
 
     update_state( state_key, state_value ){
@@ -163,6 +184,7 @@ window.EDD_Testing_Assistant_Multiple_Checkboxes = class EDD_Testing_Assistant_M
 
         this.state = {
             options: this.props.option_info.options,
+            number_of_products_in_cart: 0
         };
 
         this.variant_input_delay = null;
@@ -275,8 +297,31 @@ window.EDD_Testing_Assistant_Multiple_Checkboxes = class EDD_Testing_Assistant_M
                 // If this product does not yet exist on the screen
                 if ( i > this.state.number_of_products_in_cart ) {
 
-                    // Add available options to the array for each product
-                    state_options_holder['product_settings' + i ] = edd_testing_assistant_get_product_settings( i, temp_product_settings );
+                    // Check if variants already exist for this product in the options_to_test, and if so, use them instead of the default variants
+                    if ( this.props.options_to_test['product_settings' + i] ){
+
+                        var possibilities = edd_testing_assistant_get_product_settings( i, temp_product_settings );
+                        var actuals = this.props.options_to_test['product_settings' + i];
+                        var rebuilt_actuals = {};
+
+                        rebuilt_actuals['info'] = possibilities['info'];
+                        rebuilt_actuals['contents'] = {};
+
+                        for ( var possibility in possibilities['contents'] ) {
+                            if ( actuals[possibility] ) {
+                                rebuilt_actuals['contents'][possibility] = {};
+                                rebuilt_actuals['contents'][possibility]['info'] = possibilities['contents'][possibility]['info'];
+                                rebuilt_actuals['contents'][possibility]['contents'] = actuals[possibility];
+                            }
+                        }
+
+                        state_options_holder['product_settings' + i ] = rebuilt_actuals;
+
+                    } else {
+
+                        // Add available options to the array for each product
+                        state_options_holder['product_settings' + i ] = edd_testing_assistant_get_product_settings( i, temp_product_settings );
+                    }
 
                 }
 
@@ -304,6 +349,8 @@ window.EDD_Testing_Assistant_Multiple_Checkboxes = class EDD_Testing_Assistant_M
         if ( this.props.scenarios_are_fresh ) {
 
             var nested_checkboxes = this.add_remove_products_from_available_options();
+            console.log( nested_checkboxes );
+
             var state_holder = this.state;
 
             state_holder = this.set_default_state_of_children_checkboxes( nested_checkboxes, null, state_holder );
@@ -981,6 +1028,14 @@ window.EDD_Testing_Assistant_Number_Of_Products = class EDD_Testing_Assistant_Nu
             number_of_products_in_cart: 0
         }
 
+    }
+
+    componentDidUpdate() {
+        if ( this.props.number_of_products_in_cart != this.state.number_of_products_in_cart ) {
+            this.setState( {
+                number_of_products_in_cart: this.props.number_of_products_in_cart
+            } );
+        }
     }
 
     handle_number_change( event ) {

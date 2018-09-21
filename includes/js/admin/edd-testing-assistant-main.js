@@ -17,9 +17,10 @@ window.EDD_Testing_Assistant_Admin = class EDD_Testing_Assistant_Admin extends R
         this.state = {
             views: null,
             current_view: 'build_scenarios_view',
+            number_of_products_in_cart: 0,
             options_to_test: {},
-            total_scenarios: 1,
             all_scenarios: {},
+            total_scenarios: 1,
             scenarios_are_fresh: false
         };
 
@@ -281,7 +282,7 @@ window.EDD_Testing_Assistant_View_Button = class EDD_Testing_Assistant_View_Butt
     }
 }
 
-window.edd_testing_assistant_refresh_all_admins = function edd_testing_assistant_refresh_all_admins(){
+window.edd_testing_assistant_refresh_all = function edd_testing_assistant_refresh_all(){
     var edd_testing_assistant_admin_exists = document.querySelector( '.edd-testing-assistant-admin-settings' );
     if ( edd_testing_assistant_admin_exists ) {
 
@@ -289,10 +290,10 @@ window.edd_testing_assistant_refresh_all_admins = function edd_testing_assistant
 
         edd_testing_assistant_admins.forEach(function( edd_testing_assistant_admin ) {
 
-            ReactDOM.render( <EDD_Testing_Assistant_Admin key={ 'edd-testing-assistant-admin' } views={ edd_testing_assistant_main_js_vars.settings_and_views } vars={ edd_testing_assistant_main_js_vars } />, edd_testing_assistant_admin );
+            ReactDOM.render( <EDD_Testing_Assistant_Admin key={ 'edd-testing-assistant-admin' } vars={ edd_testing_assistant_main_js_vars } />, edd_testing_assistant_admin );
         });
 
     }
 }
 
-edd_testing_assistant_refresh_all_admins();
+edd_testing_assistant_refresh_all();
