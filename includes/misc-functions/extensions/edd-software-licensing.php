@@ -173,6 +173,8 @@ function edd_testing_assistant_software_licensing_rebuilt_product_settings( $reb
 					)
 				);
 
+				break;
+
 			case '_edd_sl_renewal_discount':
 
 				// Add the data about this field to the new array

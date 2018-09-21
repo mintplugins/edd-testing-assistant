@@ -7,6 +7,62 @@
  * @since    1.0.0
  * @return   void
  */
+function edd_testing_assistant_get_settings_and_views(){
+
+	if ( ! isset( $_GET['edd-testing-assistant-get-settings-and-views'] ) ) {
+		return false;
+	}
+
+	$contentType = isset($_SERVER["CONTENT_TYPE"]) ? trim($_SERVER["CONTENT_TYPE"]) : '';
+
+	if ( $contentType !== "application/json" ) {
+		echo json_encode( array(
+			'success' => false,
+			'details' => 'Request was incorrect.'
+		) );
+		die();
+	}
+
+	//Receive the RAW post data.
+	$content = trim(file_get_contents("php://input"));
+
+	$decoded = json_decode($content, true);
+
+	//If json_decode failed, the JSON is invalid.
+	if( ! is_array( $decoded ) ) {
+		echo json_encode( array(
+			'success' => false,
+			'details' => 'Request was incorrect.'
+		) );
+		die();
+	}
+
+	// Verify the nonce
+	if ( ! wp_verify_nonce( $decoded['nonce'], 'edd_testing_assistant_nonce' ) ) {
+		echo json_encode( array(
+			'success' => false,
+			'details' => 'Nonce failed.'
+		) );
+		die();
+	}
+
+	echo json_encode( array(
+		'success' => true,
+		'settings_and_views' => edd_testing_assistant_get_views_and_settings()
+	) );
+
+	die();
+
+}
+add_action( 'admin_init', 'edd_testing_assistant_get_settings_and_views' );
+
+/**
+ * Custom endpoint function which fetches the user roles
+ *
+ * @access   public
+ * @since    1.0.0
+ * @return   void
+ */
 function edd_testing_assistant_set_scenario(){
 
 	//print_r( edd_get_option( 'gateways' ) );
@@ -62,7 +118,7 @@ function edd_testing_assistant_set_scenario(){
 	}
 
 	// Verify the nonce
-	if ( ! wp_verify_nonce( $decoded['nonce'], 'edd_testing_assistant_update_scenario_nonce' ) ) {
+	if ( ! wp_verify_nonce( $decoded['nonce'], 'edd_testing_assistant_nonce' ) ) {
 		echo json_encode( array(
 			'success' => false,
 			'details' => 'Nonce failed.'

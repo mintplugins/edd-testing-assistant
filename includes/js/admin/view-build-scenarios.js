@@ -116,7 +116,8 @@ window.EDD_Testing_Assistant_Build_Scenarios_View = class EDD_Testing_Assistant_
 
         var json_stringified = JSON.stringify( {
             options_to_test: this.state.options_to_test,
-            all_scenarios: this.state.all_scenarios
+            all_scenarios: this.state.all_scenarios,
+            number_of_products_in_cart: this.state.number_of_products_in_cart
         }, null, 2 );
 
         return (
@@ -142,7 +143,10 @@ window.EDD_Testing_Assistant_Build_Scenarios_View = class EDD_Testing_Assistant_
                     <div className="edd-testing-assistant-generate-testing-json-area">
                         <h2>{ 'Generate Testing JSON' } </h2>
                         <p>{ 'Based on the above selection, ' + this.state.total_scenarios + ' scenario(s) need to be tested. Copy the helper JSON and move on to the next step called "Get Scenarios". It is recommended that the helper JSON been pasted into the relating GitHub issue so that others can easily run the same series of tests.' }</p>
-                        <a className="edd-testing-assistant-copy-json-button button" onClick={ this.handle_copy_button_click.bind( this, json_stringified ) }>{ 'Copy helper JSON to clipboard and proceed to next step' }</a> <a className="button" href={ 'data:text/json;charset=utf-8,' + encodeURIComponent( json_stringified ) } download={ 'ETA -' + this.state.name_of_file + ' - v' + this.state.version_of_file + '.json' }>{ 'Download helper JSON file' }</a>
+
+                        <button className="edd-testing-assistant-copy-json-button button" onClick={ this.handle_copy_button_click.bind( this, json_stringified ) }>{ 'Copy helper JSON to clipboard and proceed to next step' }</button>
+
+                        <button className="button" href={ 'data:text/json;charset=utf-8,' + encodeURIComponent( json_stringified ) } download={ 'ETA -' + this.state.name_of_file + ' - v' + this.state.version_of_file + '.json' }>{ 'Download helper JSON file' }</button>
                     </div>
 
                 </div>

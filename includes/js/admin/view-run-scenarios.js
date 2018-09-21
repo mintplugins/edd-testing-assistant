@@ -44,7 +44,7 @@ window.EDD_Testing_Assistant_Run_Scenarios_View = class EDD_Testing_Assistant_Ru
 
         var this_component = this;
 
-        fetch( this.props.ajaxurl + '?edd-testing-assistant-set-scenario', {
+        fetch( this.props.frontend_url + '?edd-testing-assistant-set-scenario', {
             method: "POST",
             mode: "same-origin",
             credentials: "same-origin",
@@ -74,9 +74,9 @@ window.EDD_Testing_Assistant_Run_Scenarios_View = class EDD_Testing_Assistant_Ru
                                     browser_tab_1_url: '',
                                 }, function() {
                                     this.setState( {
-                                        browser_tab_1_url: this.props.ajaxurl + '/checkout/',
-                                        browser_tab_2_url: this.props.ajaxurl + '/wp-admin/',
-                                        browser_tab_3_url: this.props.ajaxurl + '/wp-admin/'
+                                        browser_tab_1_url: this.props.frontend_url + '/checkout/',
+                                        browser_tab_2_url: this.props.frontend_url + '/wp-admin/',
+                                        browser_tab_3_url: this.props.frontend_url + '/wp-admin/'
                                     } );
                                 } );
 

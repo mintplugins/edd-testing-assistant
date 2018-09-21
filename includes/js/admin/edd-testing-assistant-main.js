@@ -14,10 +14,9 @@ window.EDD_Testing_Assistant_Admin = class EDD_Testing_Assistant_Admin extends R
     constructor( props ){
         super(props);
 
-        this.views = this.props.views;
-
         this.state = {
-            current_view: 'build_scenarios_view', 
+            views: null,
+            current_view: 'build_scenarios_view',
             options_to_test: {},
             total_scenarios: 1,
             all_scenarios: {},
@@ -26,6 +25,63 @@ window.EDD_Testing_Assistant_Admin = class EDD_Testing_Assistant_Admin extends R
 
         this.get_current_view_class = this.get_current_view_class.bind( this );
         this.set_current_view = this.set_current_view.bind( this );
+    }
+
+    componentDidMount() {
+
+        this.fetch_settings_and_views();
+    }
+
+    fetch_settings_and_views() {
+
+        // Now we will save the settings in EDD so they actually are ready to be tested
+        var postData = JSON.stringify({
+            nonce: this.props.vars.ajax_nonce_value
+        });
+
+        var this_component = this;
+
+        fetch( this.props.vars.admin_url + '?edd-testing-assistant-get-settings-and-views', {
+            method: "POST",
+            mode: "same-origin",
+            credentials: "same-origin",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: postData
+        } ).then(
+            function( response ) {
+                if ( response.status !== 200 ) {
+                    console.log('Looks like there was a problem. Status Code: ' +
+                    response.status);
+                    return;
+                }
+
+                // Examine the text in the response
+                response.json().then(
+                    function( data ) {
+                        if ( data.success ) {
+
+                            this_component.setState( {
+                                views: data.settings_and_views
+                            } );
+
+                        } else {
+
+                            console.log( 'Unable to fetch settings and views' );
+                            console.log( data );
+
+
+                        }
+                    }
+                );
+            }
+        ).catch(
+            function( err ) {
+                console.log('Fetch Error :-S', err);
+            }
+        );
+
     }
 
     update_state( state_key, state_value ){
@@ -105,7 +161,7 @@ window.EDD_Testing_Assistant_Admin = class EDD_Testing_Assistant_Admin extends R
 
     render_left_side_navigation_buttons() {
 
-        var views = this.views;
+        var views = this.state.views;
 
         var mapper = [];
 
@@ -139,10 +195,12 @@ window.EDD_Testing_Assistant_Admin = class EDD_Testing_Assistant_Admin extends R
                 current_view_class={ this.get_current_view_class( key ) }
                 update_parent_state={ this.update_state.bind( this ) }
                 all_scenarios={ this.state.all_scenarios }
-                ajaxurl={ this.props.ajaxurl }
-                ajax_nonce={ this.props.ajax_nonce }
+                frontend_url={ this.props.vars.frontend_url }
+                ajaxurl={ this.props.vars.admin_url }
+                ajax_nonce={ this.props.vars.ajax_nonce_value }
                 scenarios_are_fresh={ this.state.scenarios_are_fresh }
                 options_to_test={ this.state.options_to_test }
+                number_of_products_in_cart={ this.state.number_of_products_in_cart }
             /> )
         }
 
@@ -164,7 +222,7 @@ window.EDD_Testing_Assistant_Admin = class EDD_Testing_Assistant_Admin extends R
                 </div>
 
                 <div className='edd-testing-assistant-admin-current-view-container'>
-                    { this.render_actual_views( this.views ) }
+                    { this.render_actual_views( this.state.views ) }
                 </div>
 
             </div>
@@ -231,7 +289,7 @@ window.edd_testing_assistant_refresh_all_admins = function edd_testing_assistant
 
         edd_testing_assistant_admins.forEach(function( edd_testing_assistant_admin ) {
 
-            ReactDOM.render( <EDD_Testing_Assistant_Admin key={ 'edd-testing-assistant-admin' } views={ edd_testing_assistant_main_js_vars.settings_and_views } ajaxurl={ edd_testing_assistant_main_js_vars.ajaxurl } ajax_nonce={ edd_testing_assistant_main_js_vars.ajax_nonce_value } />, edd_testing_assistant_admin );
+            ReactDOM.render( <EDD_Testing_Assistant_Admin key={ 'edd-testing-assistant-admin' } views={ edd_testing_assistant_main_js_vars.settings_and_views } vars={ edd_testing_assistant_main_js_vars } />, edd_testing_assistant_admin );
         });
 
     }

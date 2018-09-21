@@ -12,26 +12,90 @@ function edd_testing_assistant_settings_menu_button(){
 	add_menu_page( 'EDD Testing Assistant', 'EDD Testing Assistant', 'activate_plugins', 'edd-testing-assistant', 'edd_testing_assistant_admin_page_output', $icon_url, 1 );
 
 }
-add_action('admin_menu', 'edd_testing_assistant_settings_menu_button');
+//add_action('admin_menu', 'edd_testing_assistant_settings_menu_button');
 
 /**
  * This function outputs the HTMl that appears on the Codeable Test plugin page
  */
 function edd_testing_assistant_admin_page_output() {
 
-	$svg_icon = edd_testing_assistant_get_svg_icon();
+	if ( isset( $_GET['edd-testing-assistant'] ) ) {
+		$svg_icon = edd_testing_assistant_get_svg_icon();
 
-	// This is all we output from PHP. The rest is handled through React JS.
-	?><div class="wrap">
-		<div class="edd-testing-assistant-admin-settings-title-area">
-			<span class="edd-testing-assistant-admin-settings-icon"><?php echo $svg_icon; ?></span>
-			<span class="edd-testing-assistant-admin-settings-title"><h2><?php echo __( 'EDD Testing Assistant', 'edd-testing-assistant' ); ?></h2></span>
+		// This is all we output from PHP. The rest is handled through React JS.
+		?><div class="wrap">
+			<div class="edd-testing-assistant-admin-settings-title-area">
+				<span class="edd-testing-assistant-admin-settings-icon"><?php echo $svg_icon; ?></span>
+				<span class="edd-testing-assistant-admin-settings-title"><h2><?php echo __( 'EDD Testing Assistant', 'edd-testing-assistant' ); ?></h2></span>
+			</div>
+			<div class="edd-testing-assistant-admin-settings"><?php echo __( 'Loading...', 'edd-testing-assistant' ); ?></div>
 		</div>
-		<div class="edd-testing-assistant-admin-settings"><?php echo __( 'Loading...', 'edd-testing-assistant' ); ?></div>
-	</div>
-	<?php
+		<?php
+
+		die();
+
+	}
 
 }
+//add_action( 'wp_head', 'edd_testing_assistant_admin_page_output', 999999 );
+
+
+/**
+ * Function which return a template array for a stack
+ * Parameter: Stack ID
+ * Parameter: $args
+ */
+function edd_testing_assistant_only_page(){
+
+	global $wp_query;
+
+	if ( isset( $_GET['edd-testing-assistant'] ) ){
+
+		?>
+        <!DOCTYPE html>
+        <html <?php language_attributes(); ?>>
+        <head>
+            <meta charset="<?php bloginfo( 'charset' ); ?>" />
+            <title><?php echo __( 'EDD Testing Assistant', 'edd-testing-assistant' ) ?></title>
+            <link rel="profile" href="//gmpg.org/xfn/11" />
+            <link rel="pingback" href="<?php bloginfo( 'pingback_url' ); ?>" />
+            <!--[if lt IE 9]>
+            <script src="<?php echo get_template_directory_uri(); ?>/js/html5.js" type="text/javascript"></script>
+            <![endif]-->
+
+            <?php wp_head(); ?>
+
+        </head>
+
+        <body class="body-edd-assistant-only">
+
+			<?php
+
+				$svg_icon = edd_testing_assistant_get_svg_icon();
+
+				// This is all we output from PHP. The rest is handled through React JS.
+				?>
+					<div class="edd-testing-assistant-admin-settings-title-area">
+						<span class="edd-testing-assistant-admin-settings-icon"><?php echo $svg_icon; ?></span>
+						<span class="edd-testing-assistant-admin-settings-title"><h2><?php echo __( 'EDD Testing Assistant', 'edd-testing-assistant' ); ?></h2></span>
+					</div>
+					<div class="edd-testing-assistant-admin-settings"><?php echo __( 'Loading...', 'edd-testing-assistant' ); ?></div>
+
+
+        <div style="display:none;">
+            <?php wp_footer(); ?>
+        </div>
+
+        </body>
+	</html>
+
+    <?php
+
+	die();
+
+	}
+}
+add_action ('wp', 'edd_testing_assistant_only_page' );
 
 /**
  * Get the settings array ready for output to use by JS
@@ -61,7 +125,7 @@ function edd_testing_assistant_get_views_and_settings(){
 					'description' => __( 'If you are testing what happens after a user checkout, enter the number of products you wish to have in the cart during each scenario. This will affect the available options below.', 'edd-testing-assistant' ),
 				),
 				'add_custom_scenarios' => array(
-					'visual_title' => __( '3. Pick your scenarios', 'edd-testing-assistant' ),
+					'visual_title' => __( '3. Create your scenarios', 'edd-testing-assistant' ),
 					'react_component' => 'multiple_checkboxes',
 					'options' => edd_testing_assistant_get_possible_options( true ),
 					'description' => __( 'Include the relevant settings for which you would like to add scenarios. If you leave a setting unchecked, the saved-to-your-system value will be used, and a unique scenario relating to that setting will not be created.', 'edd-testing-assistant' ),
