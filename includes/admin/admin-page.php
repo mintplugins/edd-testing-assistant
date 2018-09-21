@@ -1,21 +1,7 @@
 <?php
 
 /**
- * Create the button that shows in the main WordPres menu for this Codeable Test plugin
- */
-function edd_testing_assistant_settings_menu_button(){
-
-	$svg_icon = edd_testing_assistant_get_svg_icon();
-
-	$icon_url = 'data:image/svg+xml;base64,' . base64_encode( $svg_icon );
-
-	add_menu_page( 'EDD Testing Assistant', 'EDD Testing Assistant', 'activate_plugins', 'edd-testing-assistant', 'edd_testing_assistant_admin_page_output', $icon_url, 1 );
-
-}
-//add_action('admin_menu', 'edd_testing_assistant_settings_menu_button');
-
-/**
- * This function outputs the HTMl that appears on the Codeable Test plugin page
+ * This function outputs the HTMl that appears on EDD Testing Assistant page
  */
 function edd_testing_assistant_admin_page_output() {
 
