@@ -87,19 +87,33 @@ window.EDD_Testing_Assistant_Admin = class EDD_Testing_Assistant_Admin extends R
 
     update_state( state_key, state_value ){
 
-        this.setState( {
-            [state_key]: state_value
-        }, function() {
+        var this_component = this;
 
-            // Update the number of scenarios in json as well to match the new state
-            var data = update_total_scenarios( this.state.options_to_test, this.state.all_scenarios );
+        var promise = new Promise( function(resolve, reject) {
 
-            this.setState( {
-                total_scenarios: data['scenario_counter'],
-                all_scenarios: data['all_scenarios'],
-                scenarios_are_fresh: true,
+            // Update the state, then resolve the promise
+            this_component.setState( {
+                [state_key]: state_value
+            }, function() {
+                resolve( this_component.state[state_key] );
             } );
 
+        });
+
+        // Return the promise
+        return promise;
+
+    }
+
+    update_total_scenarios() {
+
+        // Update the number of scenarios in json as well to match the new state
+        var data = calculate_total_scenarios( this.state.options_to_test, this.state.all_scenarios );
+
+        this.setState( {
+            total_scenarios: data['scenario_counter'],
+            all_scenarios: data['all_scenarios'],
+            scenarios_are_fresh: true,
         } );
 
     }
@@ -195,6 +209,7 @@ window.EDD_Testing_Assistant_Admin = class EDD_Testing_Assistant_Admin extends R
                 current_view={ this.state.current_view }
                 current_view_class={ this.get_current_view_class( key ) }
                 update_parent_state={ this.update_state.bind( this ) }
+                update_total_scenarios={ this.update_total_scenarios.bind( this ) }
                 all_scenarios={ this.state.all_scenarios }
                 frontend_url={ this.props.vars.frontend_url }
                 ajaxurl={ this.props.vars.admin_url }

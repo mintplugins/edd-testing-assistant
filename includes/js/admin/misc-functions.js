@@ -116,7 +116,7 @@ window.scenario_looper = function scenario_looper( data, settings_and_variations
 
 }
 
-window.update_total_scenarios = function update_total_scenarios( options_to_test, previous_all_scenarios ) {
+window.calculate_total_scenarios = function calculate_total_scenarios( options_to_test, previous_all_scenarios ) {
 
     var settings_and_variations = variation_drill_down( {}, options_to_test, 'count_all_variations' );
 

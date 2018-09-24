@@ -50,21 +50,41 @@ window.EDD_Testing_Assistant_Build_Scenarios_View = class EDD_Testing_Assistant_
 
     update_state( state_key, state_value ){
 
-        this.setState( {
-            [state_key]: state_value
-        }, function() {
+        var this_component = this;
 
-            // Update the number of scenarios in json as well to match the new state
-            var data = update_total_scenarios( this.state.options_to_test, this.state.all_scenarios );
+        var promise = new Promise( function(resolve, reject) {
 
-            this.setState( {
-                total_scenarios: data['scenario_counter'],
-                all_scenarios: data['all_scenarios'],
+            // Update the state, then resolve the promise
+            this_component.setState( {
+                [state_key]: state_value
+            }, function() {
+
+                // Update the parent state as well
+                this_component.props.update_parent_state( state_key, state_value ).then( function() {
+                    resolve( this_component.state[state_key] );
+                } );
+
             } );
 
-            this.props.update_parent_state( state_key, state_value );
+        });
 
+        // Return the promise
+        return promise;
+
+    }
+
+    update_total_scenarios() {
+
+        // Update the number of scenarios in json as well to match the new state
+        var data = calculate_total_scenarios( this.state.options_to_test, this.state.all_scenarios );
+
+        this.setState( {
+            total_scenarios: data['scenario_counter'],
+            all_scenarios: data['all_scenarios'],
+            scenarios_are_fresh: true,
         } );
+
+        this.props.update_total_scenarios();
 
     }
 
@@ -101,6 +121,7 @@ window.EDD_Testing_Assistant_Build_Scenarios_View = class EDD_Testing_Assistant_
                             key={ key }
                             option_info={ option }
                             update_parent_state={ this.update_state.bind( this ) }
+                            update_total_scenarios={ this.update_total_scenarios.bind( this ) }
                             all_scenarios={ this.state.all_scenarios }
                             options_to_test={ this.props.options_to_test }
                             scenarios_are_fresh={ this.props.scenarios_are_fresh }
@@ -159,7 +180,12 @@ window.EDD_Testing_Assistant_Build_Scenarios_View = class EDD_Testing_Assistant_
 
                     </div>
 
-                    <EDD_Testing_Assistant_Add_Instructions_For_Scenarios total_scenarios={ this.state.total_scenarios }  all_scenarios={ this.state.all_scenarios } update_parent_state={ this.update_state.bind( this ) } />
+                    <EDD_Testing_Assistant_Add_Instructions_For_Scenarios
+                        total_scenarios={ this.state.total_scenarios }
+                        all_scenarios={ this.state.all_scenarios }
+                        update_parent_state={ this.update_state.bind( this ) }
+                        update_total_scenarios={ this.update_total_scenarios.bind( this ) }
+                    />
 
                     <div className="edd-testing-assistant-generate-testing-json-area">
                         <h2>{ 'Generate Testing JSON' } </h2>
@@ -349,7 +375,6 @@ window.EDD_Testing_Assistant_Multiple_Checkboxes = class EDD_Testing_Assistant_M
         if ( this.props.scenarios_are_fresh ) {
 
             var nested_checkboxes = this.add_remove_products_from_available_options();
-            console.log( nested_checkboxes );
 
             var state_holder = this.state;
 
@@ -452,7 +477,9 @@ window.EDD_Testing_Assistant_Multiple_Checkboxes = class EDD_Testing_Assistant_M
             options_to_test = this_component.add_child_checkbox_to_options_to_test( nested_checkboxes, null, {}, options_to_test, false );
 
             // Set the parent state
-            this_component.props.update_parent_state( 'options_to_test', options_to_test );
+            this_component.props.update_parent_state( 'options_to_test', options_to_test ).then( function() {
+                this_component.props.update_total_scenarios();
+            } );
 
         }, 500);
 
@@ -804,7 +831,9 @@ window.EDD_Testing_Assistant_Add_Instructions_For_Scenarios = class EDD_Testing_
             all_scenarios[this_component.state.current_scenario]['info'][state_prefix] = new_value;
 
             // Save the instruction to the current scenario
-            this_component.props.update_parent_state( 'all_scenarios', all_scenarios );
+            this_component.props.update_parent_state( 'all_scenarios', all_scenarios ).then( function() {
+                this_component.props.update_total_scenarios();
+            });
 
         }, 500);
 
@@ -1023,19 +1052,6 @@ window.EDD_Testing_Assistant_Number_Of_Products = class EDD_Testing_Assistant_Nu
 
     constructor( props ) {
         super( props );
-
-        this.state = {
-            number_of_products_in_cart: 0
-        }
-
-    }
-
-    componentDidUpdate() {
-        if ( this.props.number_of_products_in_cart != this.state.number_of_products_in_cart ) {
-            this.setState( {
-                number_of_products_in_cart: this.props.number_of_products_in_cart
-            } );
-        }
     }
 
     handle_number_change( event ) {
@@ -1046,11 +1062,11 @@ window.EDD_Testing_Assistant_Number_Of_Products = class EDD_Testing_Assistant_Nu
             var number_of_products = event.target.value;
         }
 
-        this.setState( {
-            number_of_products_in_cart: number_of_products
-        } );
+        var this_component = this;
 
-        this.props.update_parent_state( 'number_of_products_in_cart', event.target.value );
+        this_component.props.update_parent_state( 'number_of_products_in_cart', event.target.value ).then( function( result ) {
+            this_component.props.update_total_scenarios();
+        } );
 
     }
 
@@ -1059,7 +1075,7 @@ window.EDD_Testing_Assistant_Number_Of_Products = class EDD_Testing_Assistant_Nu
         return (
 
             <div className={ 'edd-testing-assistant-number-of-products-area' }>
-                <input type="number" min="1" value={ this.state.number_of_products_in_cart } onChange={ this.handle_number_change.bind( this ) } />
+                <input type="number" min="1" value={ this.props.number_of_products_in_cart } onChange={ this.handle_number_change.bind( this ) } />
             </div>
         )
 

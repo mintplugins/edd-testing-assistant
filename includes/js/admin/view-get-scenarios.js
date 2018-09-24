@@ -44,10 +44,31 @@ window.EDD_Testing_Assistant_Get_Scenarios_View = class EDD_Testing_Assistant_Ge
         if ( is_valid ) {
 
             // Update the options to test in the parent, which will trigger a calculation of the scenarios
-            this.props.update_parent_state( 'options_to_test', helper_object['options_to_test'] );
+            /*
+            this.props.update_parent_state( 'options_to_test', helper_object['options_to_test'] ).then( function() {;
             this.props.update_parent_state( 'all_scenarios', helper_object['all_scenarios'] );
             this.props.update_parent_state( 'number_of_products_in_cart', helper_object['number_of_products_in_cart'] );
             this.props.update_parent_state( 'scenarios_are_fresh', true );
+            */
+
+            var this_component = this;
+
+            // Update the options to test in the parent, which will trigger a calculation of the scenarios
+            this_component.props.update_parent_state( 'options_to_test', helper_object['options_to_test'] ).then( function( result ) {
+                return this_component.props.update_parent_state( 'all_scenarios', helper_object['all_scenarios'] );
+            })
+            .then(function(newResult) {
+                this_component.props.update_parent_state( 'number_of_products_in_cart', helper_object['number_of_products_in_cart'] );
+            })
+            .then(function(finalResult) {
+                this_component.props.update_parent_state( 'scenarios_are_fresh', true );
+            })
+            .then(function(finalResult) {
+                this_component.props.update_total_scenarios();
+            })
+            .catch( function() {
+                console.log( 'Something went wrong' );
+            });
 
             // Set the view to be the "Run Scenarios" step
             //this.props.update_parent_state( 'current_view', 'run_scenarios_view' );
