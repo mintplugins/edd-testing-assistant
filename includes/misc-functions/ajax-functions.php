@@ -205,8 +205,17 @@ function edd_testing_assistant_set_scenario(){
 			$data = explode( ' - Product ', sanitize_text_field( $setting_key ) );
 			$post_id = $products_created[$data[1]];
 
+			// Check what the value is, as checkboxes have specific values
+			if ( 'unchecked' == $setting_data['value'] ) {
+				$value_to_save = 0;
+			} else if ( 'checked' == $setting_data['value'] ) {
+				$value_to_save = 1;
+			} else {
+				$value_to_save = $setting_data['value'];
+			}
+
 			// Assign this as post meta to the product we created.
-			update_post_meta( $post_id, $data[0], $setting_data['value'] );
+			update_post_meta( $post_id, $data[0], $value_to_save );
 
 		} else if ( 'cart_setting' == $setting_data['context'] ) {
 
