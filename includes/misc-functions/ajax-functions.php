@@ -214,6 +214,8 @@ function edd_testing_assistant_set_scenario(){
 				$value_to_save = $setting_data['value'];
 			}
 
+			$value_to_save = apply_filters( 'edd_testing_assistant_product_setting_to_save', $value_to_save, $data[0], $setting_data['value'] );
+
 			// Assign this as post meta to the product we created.
 			update_post_meta( $post_id, $data[0], $value_to_save );
 
