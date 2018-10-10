@@ -38,6 +38,7 @@ function edd_testing_assistant_get_settings_and_views(){
 	}
 
 	// Verify the nonce
+	/*
 	if ( ! wp_verify_nonce( $decoded['nonce'], 'edd_testing_assistant_nonce' ) ) {
 		echo json_encode( array(
 			'success' => false,
@@ -45,6 +46,7 @@ function edd_testing_assistant_get_settings_and_views(){
 		) );
 		die();
 	}
+	*/
 
 	echo json_encode( array(
 		'success' => true,
@@ -118,6 +120,7 @@ function edd_testing_assistant_set_scenario(){
 	}
 
 	// Verify the nonce
+	/*
 	if ( ! wp_verify_nonce( $decoded['nonce'], 'edd_testing_assistant_nonce' ) ) {
 		echo json_encode( array(
 			'success' => false,
@@ -125,6 +128,7 @@ function edd_testing_assistant_set_scenario(){
 		) );
 		die();
 	}
+	*/
 
 	// If we made it this far, we have a valid request to set the scenario. Setting the scenario involves setting the admin settings, and possibly creating a new product with a set of settings as well.
 	$current_scenario = $decoded['current_scenario'];
