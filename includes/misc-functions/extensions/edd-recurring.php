@@ -148,6 +148,10 @@ function edd_testing_assistant_format_free_trial_for_save( $value_to_save, $key,
 		return $value_to_save;
 	}
 
+	if ( $value_from_ajax == 'unchecked') {
+		return $value_to_save;
+	}
+
 	$value_to_save = array(
 		'quantity' => 1,
 		'unit'     => 'day',
