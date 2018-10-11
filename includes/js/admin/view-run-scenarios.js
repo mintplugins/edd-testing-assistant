@@ -74,6 +74,7 @@ window.EDD_Testing_Assistant_Run_Scenarios_View = class EDD_Testing_Assistant_Ru
                                     browser_tab_1_url: '',
                                 }, function() {
                                     this.setState( {
+                                        browser_tab_1_waiting: false,
                                         browser_tab_1_url: this.props.frontend_url + '/checkout/',
                                         browser_tab_2_url: this.props.frontend_url + '/wp-admin/',
                                         browser_tab_3_url: this.props.frontend_url + '/wp-admin/'
@@ -102,7 +103,11 @@ window.EDD_Testing_Assistant_Run_Scenarios_View = class EDD_Testing_Assistant_Ru
 
     set_current_scenario( key ) {
 
+        this.switch_browser_tab( 1 );
+
         this.setState( {
+            browser_tab_1_url: '',
+            browser_tab_1_waiting: true,
             current_scenario: key
         }, function() {
 
@@ -136,7 +141,7 @@ window.EDD_Testing_Assistant_Run_Scenarios_View = class EDD_Testing_Assistant_Ru
         // This lets us output the buttons one by one
         return mapper.map((scenario_link, index) => {
           return scenario_link;
-        })
+        });
     }
 
     render_current_scenario( current_scenario, all_scenarios ) {
@@ -159,7 +164,7 @@ window.EDD_Testing_Assistant_Run_Scenarios_View = class EDD_Testing_Assistant_Ru
         // This lets us output the settings one by one
         return mapper.map((setting, index) => {
           return setting;
-        })
+        });
     }
 
     browser_tab_hidden_attribute( browser_tab_id, current_browser_tab ) {
@@ -192,12 +197,19 @@ window.EDD_Testing_Assistant_Run_Scenarios_View = class EDD_Testing_Assistant_Ru
                             <button onClick={ this.switch_browser_tab.bind( null, 2 ) }>Tab 2</button>
                             <button onClick={ this.switch_browser_tab.bind( null, 3 ) }>Tab 3</button>
                         </div>
+                        { () => {
+                          if ( this.state.browser_tab_1_waiting ) {
+                            return <div>Loading...</div>;
+                          } else {
+                            return '';
+                          }
+                        }() }
                         <iframe hidden={ this.browser_tab_hidden_attribute( 1, this.state.current_browser_tab ) } src={ this.state.browser_tab_1_url }></iframe>
                         <iframe hidden={ this.browser_tab_hidden_attribute( 2, this.state.current_browser_tab ) } src={ this.state.browser_tab_2_url }></iframe>
                         <iframe hidden={ this.browser_tab_hidden_attribute( 3, this.state.current_browser_tab ) } src={ this.state.browser_tab_3_url }></iframe>
                     </div>
                 </div>
-            )
+            );
         }
     }
 
@@ -213,17 +225,17 @@ window.EDD_Testing_Assistant_Run_Scenarios_View = class EDD_Testing_Assistant_Ru
         if ( 'attempting_to_set' == this.state.scenario_data_set ) {
             return (
                 <div className={ 'edd-testing-assistant-setting-scenario-data' }>Setting scenario data...</div>
-            )
+            );
         }
         if ( this.state.scenario_data_set ) {
             return (
                 <div className={ 'edd-testing-assistant-scenario-data-set' }>{ 'Scenario data has been saved and set! You are ready to test scenario ' + this.state.current_scenario + '.' }</div>
-            )
+            );
         }
 
         return (
             <div className={ 'edd-testing-assistant-scenario-data-not-set' }>Unable to set scenario data! The nonce has likely timed out and you have to refresh.</div>
-        )
+        );
 
     }
 
@@ -262,7 +274,7 @@ window.EDD_Testing_Assistant_Run_Scenarios_View = class EDD_Testing_Assistant_Ru
                 </div>
                 { this.render_browser() }
             </div>
-        )
+        );
     }
 
 }

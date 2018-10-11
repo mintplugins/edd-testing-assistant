@@ -105,7 +105,7 @@ window.EDD_Testing_Assistant_Get_Scenarios_View = class EDD_Testing_Assistant_Ge
                     <textarea value={ this.state.helper_json } onChange={ this.handle_helper_json_change.bind( null ) }></textarea>
                 </div>
             </div>
-        )
+        );
     }
 
 }

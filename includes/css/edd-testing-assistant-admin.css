@@ -142,6 +142,10 @@
 .edd-testing-assistant-admin-settings .edd-testing-assistant-scenario-link:first-child{
 	margin-left:0px;
 }
+.edd-testing-assistant-admin-settings .edd-testing-assistant-scenario-link.active{
+	background-color:#d0f8cd;
+	color:#000000;
+}
 .edd-testing-assistant-current-scenario-area{
 	margin-top:20px;
 }

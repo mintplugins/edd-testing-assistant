@@ -190,7 +190,7 @@ window.EDD_Testing_Assistant_Admin = class EDD_Testing_Assistant_Admin extends R
         // This lets us output the buttons one by one
         return mapper.map((view, index) => {
           return view;
-        })
+        });
     }
 
     render_actual_views( views ) {
@@ -223,7 +223,7 @@ window.EDD_Testing_Assistant_Admin = class EDD_Testing_Assistant_Admin extends R
         // This lets us output the buttons one by one
         return mapper.map((view, index) => {
           return view;
-        })
+        });
 
     }
 
@@ -277,7 +277,7 @@ window.EDD_Testing_Assistant_View_Button = class EDD_Testing_Assistant_View_Butt
         // This lets us output the buttons one by one
         return mapper.map((view, index) => {
           return view;
-        })
+        });
 
     }
 

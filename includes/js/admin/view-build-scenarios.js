@@ -102,7 +102,7 @@ window.EDD_Testing_Assistant_Build_Scenarios_View = class EDD_Testing_Assistant_
         // This lets us output the buttons one by one
         return mapper.map((option, index) => {
           return option;
-        })
+        });
 
     }
 
@@ -129,7 +129,7 @@ window.EDD_Testing_Assistant_Build_Scenarios_View = class EDD_Testing_Assistant_
                         />
                     }</div>
                 </div>
-            )
+            );
         }
     }
 
@@ -198,7 +198,7 @@ window.EDD_Testing_Assistant_Build_Scenarios_View = class EDD_Testing_Assistant_
 
                 </div>
             </div>
-        )
+        );
     }
 
 }
@@ -715,7 +715,7 @@ window.EDD_Testing_Assistant_Multiple_Checkboxes = class EDD_Testing_Assistant_M
         // This lets us output the buttons one by one
         return mapper.map((setting, index) => {
           return setting;
-        })
+        });
 
     }
 
@@ -768,14 +768,14 @@ window.EDD_Testing_Assistant_Multiple_Checkboxes = class EDD_Testing_Assistant_M
         // This lets us output the buttons one by one
         return mapper.map((setting, index) => {
           return setting;
-        })
+        });
 
     }
 
     render() {
 
         if ( ! this.state.component_has_mounted ) {
-            return false
+            return false;
         }
 
         return (
@@ -883,7 +883,7 @@ window.EDD_Testing_Assistant_Add_Instructions_For_Scenarios = class EDD_Testing_
         // This lets us output the buttons one by one
         return mapper.map((scenario_link, index) => {
           return scenario_link;
-        })
+        });
     }
 
     render_current_scenario( current_scenario, all_scenarios ) {
@@ -901,7 +901,7 @@ window.EDD_Testing_Assistant_Add_Instructions_For_Scenarios = class EDD_Testing_
         // This lets us output the settings one by one
         return mapper.map((setting, index) => {
           return setting;
-        })
+        });
     }
 
     render() {
@@ -948,7 +948,7 @@ window.EDD_Testing_Assistant_Add_Instructions_For_Scenarios = class EDD_Testing_
                         </div>
                     </div>
                 </div>
-            )
+            );
         } else {
             return( '' );
         }
@@ -1043,7 +1043,7 @@ window.EDD_Testing_Assistant_Name_Of_Test = class EDD_Testing_Assistant_Name_Of_
                     </label>
                 </div>
             </div>
-        )
+        );
 
     }
 }
@@ -1077,7 +1077,7 @@ window.EDD_Testing_Assistant_Number_Of_Products = class EDD_Testing_Assistant_Nu
             <div className={ 'edd-testing-assistant-number-of-products-area' }>
                 <input type="number" min="1" value={ this.props.number_of_products_in_cart } onChange={ this.handle_number_change.bind( this ) } />
             </div>
-        )
+        );
 
     }
 }
