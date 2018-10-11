@@ -238,7 +238,7 @@ function edd_testing_assistant_set_scenario(){
 				}
 
 				// Check if there is a percentage sign in the value
-				if ( strpos( '%', $setting_data['value'] ) !== false ) {
+				if ( strpos( $setting_data['value'], '%' ) !== false ) {
 					$exploder = explode( '%', $setting_data['value'] );
 					$amount = $exploder[0];
 					$type = 'percentage';
